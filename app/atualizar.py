@@ -9,9 +9,11 @@ from pathlib import Path
 
 SIS = Path.home() / "CortesAutomacao" / ".sistema"
 CACHE = SIS / ".atualizacao_cache.json"
-UV = Path.home() / ".local" / "bin" / "uv"
+import comum
+
+UV = comum.LOCAL / f"uv{comum.EXE}"
 # o que uma atualização pode trocar (nunca ajustes.json, ia.json, chaves ou pastas de dados)
-EXTENSOES = (".py", ".sh", ".html", ".md", ".txt", ".applescript", ".icns", ".command")
+EXTENSOES = (".py", ".sh", ".html", ".md", ".txt", ".applescript", ".icns", ".command", ".ps1", ".bat", ".ico", ".json.modelo")
 NOMES = ("VERSAO", "atualizacao.json")
 
 
@@ -74,8 +76,8 @@ def aplicar():
                 if base.endswith((".sh", ".command")):
                     os.chmod(destino, 0o755)
     req_txt = SIS / "requisitos.txt"
-    if UV.exists() and req_txt.exists() and (SIS / "venv" / "bin" / "python").exists():
-        subprocess.run([str(UV), "pip", "install", "-q", "--python", str(SIS / "venv" / "bin" / "python"),
+    if UV.exists() and req_txt.exists() and comum.PY.exists():
+        subprocess.run([str(UV), "pip", "install", "-q", "--python", str(comum.PY),
                         "-r", str(req_txt)], capture_output=True, timeout=900)
     CACHE.unlink(missing_ok=True)
     return {"atualizado": True, "versao": versao_atual()}

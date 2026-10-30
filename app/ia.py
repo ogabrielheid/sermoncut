@@ -15,7 +15,9 @@ from pathlib import Path
 
 SIS = Path.home() / "CortesAutomacao" / ".sistema"
 CONFIG = SIS / "ia.json"
-CLAUDE = Path.home() / ".local" / "bin" / "claude"
+import comum
+
+CLAUDE = comum.claude()
 
 PROVEDORES = {
     "claude_pro": {"nome": "Claude (assinatura Pro)", "chave": False, "modelo": ""},
@@ -84,7 +86,7 @@ def perguntar(texto, pasta=None, cfg=None):
         raise Colar()
     if prov == "claude_pro":
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_BASE_URL"}
-        r = subprocess.run([str(CLAUDE), "-p", "--output-format", "text"], input=texto, capture_output=True,
+        r = subprocess.run([CLAUDE, "-p", "--output-format", "text"], input=texto, capture_output=True,
                            text=True, cwd=pasta or SIS, env=env, timeout=1800)
         if r.returncode != 0 or not r.stdout.strip():
             raise RuntimeError((r.stdout + r.stderr).strip()[-300:] or "o Claude não respondeu (está logado?)")

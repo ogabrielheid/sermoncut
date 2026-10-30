@@ -14,7 +14,9 @@ analise.json (escrito pela tarefa do Claude):
 import html, json, subprocess, sys, tempfile
 from pathlib import Path
 
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+import comum
+
+CHROME = comum.navegador()
 a = json.load(open(sys.argv[1]))
 out = Path(sys.argv[2])
 e = html.escape
@@ -83,6 +85,6 @@ footer {{ margin-top: 12px; font-size: 9pt; color: #555; border-top: 1px solid #
 with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False, encoding="utf-8") as f:
     f.write(doc)
 subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-                f"--print-to-pdf={out}", f"file://{f.name}"], check=True,
+                f"--print-to-pdf={out}", Path(f.name).as_uri()], check=True,
                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
 print(out)

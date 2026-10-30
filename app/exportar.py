@@ -14,8 +14,7 @@ import comum
 
 SIS = Path.home() / "CortesAutomacao" / ".sistema"
 TRANS = SIS / "transcricoes"
-FFMPEG = SIS / "bin" / "ffmpeg"
-SAIDA = Path.home() / "Desktop" / "CORTES EXPORTADOS"
+SAIDA = comum.mesa() / "CORTES EXPORTADOS"
 UA = "Mozilla/5.0"
 LIMITE = 179  # 2min59s
 
@@ -42,7 +41,7 @@ def web(endereco):
 
 def sondar(endereco):
     """Largura, altura e fps de um vídeo (arquivo ou link)."""
-    info = subprocess.run([str(FFMPEG), "-hide_banner", *web(endereco), "-i", endereco],
+    info = subprocess.run([comum.ffmpeg(), "-hide_banner", *web(endereco), "-i", endereco],
                           capture_output=True, text=True, timeout=120).stderr
     m = re.search(r"Video: .*?, (\d{2,5})x(\d{2,5})", info)
     f = re.search(r"([\d.]+) fps", info)
@@ -77,7 +76,7 @@ def main(pedido):
                     tmp = Path(tempfile.mkdtemp(prefix="corte_"))
                     alt = pedido["altura"] or 4320
                     base, env = comum.ytdlp()
-                    subprocess.run([*base, "--no-playlist", "--ffmpeg-location", str(FFMPEG),
+                    subprocess.run([*base, "--no-playlist", "--ffmpeg-location", comum.ffmpeg(),
                                     "-f", f"bv*[height<={alt}][width<={alt * 16 // 9 + 8}]+ba/b",
                                     "--download-sections", f"*{max(0, ini - 2)}-{fim + 2}", "--merge-output-format", "mkv",
                                     "-o", str(tmp / "trecho.%(ext)s"), endereco],
@@ -113,12 +112,11 @@ def main(pedido):
             n += 1
         salvar(status="exportando", fonte=tipo, arquivo=str(out),
                original=f"{largura}x{altura} {fps:g} fps", mbps=mbps)
-        cmd = [str(FFMPEG), "-hide_banner", "-loglevel", "error", "-y", *web(entrada),
+        cmd = [comum.ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", *web(entrada),
                "-ss", f"{desloc:.3f}", "-i", entrada, "-t", f"{dur:.3f}"]
         if filtros:
             cmd += ["-vf", ",".join(filtros)]
-        cmd += ["-c:v", "h264_videotoolbox", "-b:v", f"{mbps}M", "-maxrate", f"{round(mbps * 1.3)}M",
-                "-bufsize", f"{mbps * 2}M", "-profile:v", "high", "-c:a", "aac", "-b:a", "320k",
+        cmd += [*comum.args_h264(mbps), "-c:a", "aac", "-b:a", "320k",
                 "-movflags", "+faststart", "-progress", "pipe:1", str(out)]
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         ultimo = 0

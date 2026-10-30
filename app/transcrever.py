@@ -7,14 +7,13 @@ vídeo sem transcrição gera, em .sistema/transcricoes/<nome>/:
   status            "transcrevendo" -> "transcrito" (a análise do Claude
                     depois grava "relatorio_pronto")
 """
-import fcntl, json, re, subprocess, sys, time
+import json, re, subprocess, sys, time
 from pathlib import Path
 
 BASE = Path.home() / "CortesAutomacao"
 ENTRADA = BASE / "1 - SOLTE O VIDEO AQUI"
 SIS = BASE / ".sistema"
 TRANS = SIS / "transcricoes"
-FFMPEG = SIS / "bin" / "ffmpeg"
 VIDEO_EXT = {".mp4", ".mov", ".m4v", ".mkv", ".mxf", ".avi", ".mts"}
 LOG = SIS / "log.txt"
 
@@ -40,7 +39,8 @@ def transcrever(video, pasta):
     (pasta / "status").write_text("transcrevendo")
     (pasta / "video.txt").write_text(str(video))
     wav = pasta / "audio.wav"
-    subprocess.run([str(FFMPEG), "-hide_banner", "-loglevel", "error", "-y", "-i", str(video),
+    import comum
+    subprocess.run([comum.ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-i", str(video),
                     "-vn", "-ac", "1", "-ar", "16000", str(wav)], check=True)
     import comum
     model = WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=comum.threads())
@@ -61,6 +61,7 @@ def transcrever(video, pasta):
 
 
 def main():
+    import fcntl  # modo antigo da pasta de entrada (só Mac)
     TRANS.mkdir(parents=True, exist_ok=True)
     lock = open(SIS / ".lock", "w")
     try:

@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>SermonCut</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json"><link rel="apple-touch-icon" href="/icone.png">
+<meta name="theme-color" content="#111115"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SermonCut">
 <style>
 :root {
   --bg: #111115; --painel: #1a1a20; --painel2: #212129; --borda: #2c2c36;
@@ -263,6 +266,32 @@ header { height: 56px; }
   border: 1px solid var(--acento); border-radius: 14px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.5); }
 #novaVersao b { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 #novaVersao p { color: var(--txt2); font-size: 12.5px; margin: 6px 0 10px; line-height: 1.45; max-height: 90px; overflow: auto; white-space: pre-line; }
+body.remoto .so-local { display: none !important; }
+@media (max-width: 820px) {
+  html, body { height: auto; }
+  body { display: block; overflow: auto; padding-bottom: env(safe-area-inset-bottom); }
+  header { height: auto; flex-wrap: wrap; gap: 8px; padding: 8px 10px; padding-top: max(8px, env(safe-area-inset-top)); position: sticky; top: 0; z-index: 30; }
+  header .esp, .downs, #status { display: none !important; }
+  header select { order: 10; flex: 1 1 100%; max-width: 100%; min-width: 0; width: 100%; }
+  main { display: block; }
+  .monitor { border-right: 0; }
+  .tela { height: 56vw; max-height: 60vh; flex: none; }
+  .transporte { flex-wrap: wrap; }
+  .transporte .repetir { display: none; }
+  aside { min-height: 70vh; }
+  aside .abas { position: sticky; top: 92px; background: var(--painel); z-index: 5; overflow-x: auto; }
+  .lista { overflow: visible; }
+  footer { overflow-x: auto; }
+  .tl { min-width: 720px; }
+  .opcoes, .ia-grade, .grade2, .detalhe { grid-template-columns: 1fr !important; }
+  .kpis { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; } .kpi b { font-size: 18px; } .kpi small { font-size: 10.5px; }
+  .canal { display: block; } .cform { border-right: 0; }
+  .aj { grid-template-columns: 1fr; } .aj nav { display: flex; overflow-x: auto; padding: 8px; } .aj nav button { white-space: nowrap; width: auto; }
+  dialog { width: 94vw !important; max-width: 94vw; }
+  .expgrid { grid-template-columns: 1fr; }
+  .vbar { grid-template-columns: 110px 1fr 30px !important; }
+  #novaVersao { left: 12px; right: 12px; width: auto; }
+}
 .downs { display: flex; gap: 6px; overflow: hidden; }
 mark { background: #f5b83d; color: #000; border-radius: 2px; }
 
@@ -312,6 +341,7 @@ footer { background: var(--painel); border-top: 1px solid var(--borda); padding:
     <div class="menu" id="menuAjustes" hidden>
       <button data-ajuste="ia"><i data-ic="ia"></i> IA das análises</button>
       <button data-ajuste="abas"><i data-ic="abas"></i> Personalizar abas</button>
+      <button data-ajuste="celular" class="so-local"><i data-ic="celular"></i> Abrir no celular</button>
       <button data-ajuste="sobre">ℹ️ Sobre o SermonCut</button>
     </div>
   </div>
@@ -390,13 +420,13 @@ footer { background: var(--painel); border-top: 1px solid var(--borda); padding:
 <div id="iaView" hidden></div>
 <div id="novaVersao" hidden></div>
 <dialog id="dlgAjustes"><div class="aj">
-  <nav><button data-secao="ia"><i data-ic="ia"></i> IA das análises</button><button data-secao="abas" class="on"><i data-ic="abas"></i> Abas e recursos</button><button data-secao="sobre"><i data-ic="info"></i> Sobre</button>
+  <nav><button data-secao="ia"><i data-ic="ia"></i> IA das análises</button><button data-secao="abas" class="on"><i data-ic="abas"></i> Abas e recursos</button><button data-secao="celular" class="so-local"><i data-ic="celular"></i> Celular</button><button data-secao="sobre"><i data-ic="info"></i> Sobre</button>
     <button id="ajFechar" style="margin-top:20px;color:var(--txt2)">Fechar</button></nav>
   <section id="ajConteudo"></section>
 </div></dialog>
 <dialog id="dlgExp">
   <h2>Exportar corte</h2>
-  <p>Sai já cortado, pronto para jogar no Premiere. O arquivo vai para a pasta <b>CORTES EXPORTADOS</b> na Mesa.</p>
+  <p>Sai já cortado, pronto para jogar no Premiere. O arquivo vai para a pasta <b>CORTES EXPORTADOS</b> na <span class="nome-mesa">Mesa</span>.</p>
   <div class="fonte-info" id="expFonte">Verificando a qualidade disponível…</div>
   <div class="expgrid">
     <label class="larga">Nome do arquivo <input id="expNome"></label>
@@ -429,6 +459,7 @@ const ICO = {
   texto: '<path d="M4 6h16M4 12h16M4 18h10"/>',
   biblia: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/><path d="M12 6v8M9 9h6"/>',
   estudo: '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+  celular: '<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
   busca: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
   livro: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
   aspas: '<path d="M3 21c3 0 7-1 7-8V5H3v8h4c0 3-1 4-4 4zM14 21c3 0 7-1 7-8V5h-7v8h4c0 3-1 4-4 4z"/>',
@@ -510,7 +541,7 @@ let importando = false, avisoChave = "";
 function htmlImportar(titulo, texto, projeto) {
   return `<div class="importar"><h2>${titulo}</h2><p style="margin:0 auto 16px">${texto}</p>
     <div class="opcoes">
-      <div class="opc"><b>${ic("computador")} Do computador</b><small>Escolha o arquivo do culto no Mac.</small>
+      <div class="opc so-local"><b>${ic("computador")} Do computador</b><small>Escolha o arquivo do culto no ${COMPUTADOR}.</small>
         <button class="prim" data-imp="pc">Escolher arquivo</button></div>
       <div class="opc"><b>${ic("nuvem")} Google Drive</b><small>Link de um vídeo ou de uma pasta, compartilhado como “Qualquer pessoa com o link”.</small>
         <input id="impDrive" placeholder="drive.google.com/…"><button class="prim" data-imp="drive">Trazer do Drive</button></div>
@@ -1045,6 +1076,17 @@ $("cres").onclick = e => {
   if (cp) copiar(textos[cp.dataset.copiar], cp);
 };
 
+// ---------- sistema (Mac, Windows ou celular) ----------
+let SO = "mac", REMOTO = false, MESA = "Mesa", COMPUTADOR = "Mac", COLAR = "⌘V";
+async function carregarSistema() {
+  const r = await api("/api/sistema").catch(() => ({}));
+  SO = r.so || "mac"; REMOTO = !!r.remoto;
+  if (SO === "windows") { MESA = "Área de Trabalho"; COMPUTADOR = "computador"; COLAR = "Ctrl+V"; }
+  if (REMOTO) COLAR = "segure e Colar";
+  document.querySelectorAll(".nome-mesa").forEach(e => e.textContent = MESA);
+  document.body.classList.toggle("remoto", REMOTO);
+}
+
 // ---------- configurações (engrenagem) ----------
 let AJ = null, secaoAj = "abas", editandoSobre = false;
 const ABAS = [["momentos", "Cortes", "Os momentos sugeridos para cortar"], ["transcricao", "Transcrição", "Texto clicável da pregação"],
@@ -1083,14 +1125,15 @@ function desenharAjustes() {
   const C = $("ajConteudo"), chave = (grupo, [k, r, d]) => `<label class="chave"><span>${ICONE_AJ[k] ? ic(ICONE_AJ[k]) + " " : ""}${r}<small>${d}</small></span>
     <input type="checkbox" data-grupo="${grupo}" data-k="${k}" ${AJ[grupo][k] ? "checked" : ""}></label>`;
   if (secaoAj === "ia") { iaSel = iaSel || IA.provedor; C.innerHTML = htmlIA(true); return; }
+  if (secaoAj === "celular") { desenharCelular(C); return; }
   if (secaoAj === "abas") {
     C.innerHTML = `<h3>Abas e recursos</h3><p style="color:var(--txt2);margin:0">Deixe só o que você usa. Dá para voltar ao padrão quando quiser.</p>
       <h4>Abas da pregação</h4>${ABAS.map(a => chave("abas", a)).join("")}
       <h4>Recursos</h4>${RECURSOS.map(a => chave("recursos", a)).join("")}
       <h4>Desempenho</h4>
-      ${[["leve", ic("folha") + " Leve", "Usa só os núcleos de economia do Mac. Quase não se nota, mas demora mais (bom para editar ao mesmo tempo)."],
-         ["equilibrado", ic("balanca") + " Equilibrado", "Padrão. Usa metade do processador com prioridade baixa: rápido sem travar o Mac."],
-         ["maximo", ic("foguete") + " Máximo", "Usa o processador inteiro para terminar o mais rápido possível. O Mac pode esquentar e ficar lento."]]
+      ${[["leve", ic("folha") + " Leve", "Usa o mínimo do processador, com prioridade bem baixa. Quase não se nota, mas demora mais (bom para editar ao mesmo tempo)."],
+         ["equilibrado", ic("balanca") + " Equilibrado", "Padrão. Usa metade do processador com prioridade baixa: rápido sem travar o computador."],
+         ["maximo", ic("foguete") + " Máximo", "Usa o processador inteiro para terminar o mais rápido possível. O computador pode esquentar e ficar lento."]]
         .map(([k, r, d]) => `<label class="chave"><span>${r}<small>${d}</small></span>
           <input type="radio" name="desemp" value="${k}" ${AJ.desempenho.modo === k ? "checked" : ""}></label>`).join("")}
       <small style="color:var(--txt2)">Vale para a transcrição, os downloads e as exportações que começarem depois da mudança.</small>
@@ -1117,23 +1160,53 @@ function desenharAjustes() {
     <h4>Compartilhar o SermonCut</h4>
     ${link ? `<div class="linkbox"><input readonly value="${esc(link)}"><button class="prim" id="ajCopiarLink">Copiar link</button></div>` :
       `<p style="color:var(--txt2);margin:0">O link de instalação aparece aqui assim que for publicado.</p>`}
-    <p style="margin:10px 0 0"><button id="ajPacote">${ic("pacote")} Gerar pacote de instalação (SermonCut.zip)</button></p>
-    <small style="color:var(--txt2)">Cria o SermonCut.zip na Mesa com o instalador. Suba no seu Google Drive, compartilhe como
+    <p style="margin:10px 0 0" class="so-local"><button id="ajPacote">${ic("pacote")} Gerar pacote de instalação (SermonCut.zip)</button></p>
+    <small style="color:var(--txt2)">Cria o SermonCut.zip (Mac) e o SermonCut-Windows.zip na sua Mesa. Suba no seu Google Drive, compartilhe como
       “Qualquer pessoa com o link” e cole o link acima em <b>editar</b>.</small>
-    ${ATU?.pode_publicar ? `<h4>Publicar atualização <span style="text-transform:none;letter-spacing:0;font-weight:400">(só aparece no seu Mac)</span></h4>
+    ${ATU?.pode_publicar && !REMOTO ? `<h4>Publicar atualização <span style="text-transform:none;letter-spacing:0;font-weight:400">(só aparece no seu Mac)</span></h4>
       <label class="campo">O que mudou nesta versão<textarea id="pubNotas" placeholder="Ex.: Nova aba Bíblia com as passagens citadas na pregação."></textarea></label>
       <button class="prim" id="ajPublicar">${ic("pacote")} Publicar no GitHub</button> <span class="ia-msg" id="pubMsg"></span>` : ""}
-    <h4>Como instalar em outro Mac</h4>
+    <h4>Como instalar em outro computador</h4>
     <ol class="passos">
-      <li>Precisa de um Mac com chip Apple (M1 ou mais novo), o <b>Google Chrome</b> e uns 3 GB livres.</li>
-      <li>Abra o link acima e baixe o arquivo <b>SermonCut.zip</b>.</li>
-      <li>Dê dois cliques no zip e depois em <b>Instalar SermonCut</b>. Se o Mac avisar que o app é de desenvolvedor não identificado, clique com o botão direito › <b>Abrir</b>.</li>
-      <li>A instalação leva uns 5 minutos e coloca o ícone <b>SermonCut</b> na Mesa.</li>
+      <li>Abra o link acima e baixe a versão do seu computador: <b>Mac</b> (chip Apple M1 ou mais novo, com Google Chrome) ou <b>Windows</b> 10/11.</li>
+      <li><b>Mac:</b> dê dois cliques no zip, depois botão direito em <b>Instalar SermonCut</b> › <b>Abrir</b>.<br>
+        <b>Windows:</b> botão direito no zip › <b>Extrair tudo</b>, depois dois cliques em <b>Instalar SermonCut.bat</b> (se aparecer um aviso azul, <b>Mais informações › Executar assim mesmo</b>).</li>
+      <li>A instalação leva uns 5 minutos e coloca o ícone <b>SermonCut</b> na Mesa / Área de Trabalho.</li>
       <li>Na primeira vez, o app pede para escolher a <b>IA das análises</b>: Gemini (grátis), a conta grátis que você já usa no ChatGPT, Gemini, Claude ou DeepSeek, a assinatura Claude Pro, ou uma chave de API.</li>
       <li>Pronto: arraste um vídeo de culto no ícone ou traga pelo Drive/YouTube.</li>
     </ol>`;
 }
+let CEL = null;
+async function desenharCelular(C) {
+  CEL = CEL || await api("/api/celular");
+  const end = CEL.enderecos[0] || "";
+  C.innerHTML = `<h3>Abrir no celular</h3><p style="color:var(--txt2);margin:0 0 14px">Use o SermonCut no celular (iPhone ou Android) pelo Wi‑Fi.
+      O ${COMPUTADOR} continua fazendo o trabalho pesado, então ele precisa estar ligado, com o app aberto, na mesma rede do celular.</p>
+    <label class="chave"><span>${ic("celular")} Permitir abrir no celular<small>Protegido por um código de acesso de 6 números.</small></span>
+      <input type="checkbox" id="celAtivo" ${CEL.ativo ? "checked" : ""}></label>
+    ${CEL.ativo ? `<div class="kpis" style="grid-template-columns:2fr 1fr;margin:14px 0">
+        <div class="kpi"><small>No navegador do celular, digite</small><b style="font-size:19px;user-select:text">${esc(end || "conecte o computador ao Wi-Fi")}</b></div>
+        <div class="kpi"><small>Código de acesso</small><b style="letter-spacing:.12em;user-select:text">${esc(CEL.pin)}</b></div></div>
+      <p><button id="celNovoPin">${ic("refazer")} Gerar outro código</button>
+        <small style="color:var(--txt2)">Quem já entrou precisa digitar o código novo.</small></p>
+      <h4>iPhone</h4><ol class="passos"><li>Abra o <b>Safari</b> e digite o endereço acima.</li><li>Digite o código de acesso.</li>
+        <li>Toque em <b>Compartilhar</b> › <b>Adicionar à Tela de Início</b>: o SermonCut fica com ícone, como um app.</li></ol>
+      <h4>Android</h4><ol class="passos"><li>Abra o <b>Chrome</b> e digite o endereço acima.</li><li>Digite o código de acesso.</li>
+        <li>Toque nos <b>⋮</b> › <b>Adicionar à tela inicial</b> (ou Instalar app).</li></ol>
+      <small style="color:var(--txt2)">No celular dá para assistir aos cortes, ler a transcrição, o estudo, a Bíblia e as frases, copiar textos,
+        trazer cultos pelo Drive ou YouTube e exportar cortes (o arquivo é baixado no celular).
+        ${SO === "mac" ? "Se o Mac perguntar se o Python pode aceitar conexões, clique em Permitir." : "Se o Windows perguntar sobre o Firewall, permita em Redes privadas."}</small>` : ""}`;
+}
 $("ajConteudo").onchange = e => {
+  if (e.target.id === "celAtivo") {
+    (async () => {
+      e.target.disabled = true;
+      CEL = await fetch("/api/celular", { method: "POST", body: JSON.stringify({ ativo: e.target.checked }) }).then(r => r.json());
+      await new Promise(r => setTimeout(r, 2500));  // o servidor religa para ouvir (ou não) a rede Wi-Fi
+      desenharAjustes();
+    })();
+    return;
+  }
   if (e.target.name === "desemp") { AJ.desempenho.modo = e.target.value; return salvarAjustes(); }
   const c = e.target.closest("[data-grupo]"); if (!c) return;
   AJ[c.dataset.grupo][c.dataset.k] = c.checked;
@@ -1154,6 +1227,10 @@ $("ajConteudo").onclick = async e => {
     await salvarAjustes(); editandoSobre = false; desenharAjustes();
   }
   if (id === "ajCopiarLink") copiar(AJ.sobre.link, e.target);
+  if (id === "celNovoPin") {
+    CEL = await fetch("/api/celular", { method: "POST", body: JSON.stringify({ ativo: true, novo_pin: true }) }).then(r => r.json());
+    await new Promise(r => setTimeout(r, 2500)); desenharAjustes();
+  }
   if (id === "ajAtualizar") { $("dlgAjustes").close(); return atualizarApp(); }
   if (id === "ajProcurar") { e.target.disabled = true; await verAtualizacao(true);
     if (!ATU.nova && $("ajAtuMsg")) $("ajAtuMsg").textContent = ATU.repo ? "Você já está na versão mais nova." : "Ainda não há versões publicadas."; }
@@ -1168,7 +1245,7 @@ $("ajConteudo").onclick = async e => {
   if (id === "ajPacote") {
     e.target.disabled = true; e.target.textContent = "Gerando…";
     const r = await fetch("/api/pacote", { method: "POST" }).then(r => r.json());
-    e.target.disabled = false; e.target.textContent = r.zip ? "✓ SermonCut.zip criado na Mesa" : "Não deu certo, tente de novo";
+    e.target.disabled = false; e.target.textContent = r.zip ? `✓ Pacotes criados na ${MESA}` : "Não deu certo, tente de novo";
   }
 };
 carregarAjustes();
@@ -1215,7 +1292,7 @@ function htmlIA(naEngrenagem) {
   };
   return (naEngrenagem ? `<h3>IA das análises</h3><p style="color:var(--txt2);margin:0 0 14px">Escolha quem analisa as pregações: cortes, estudo, frases, viral e canal.</p>` :
     `<div class="marca" style="font-size:17px"><i>${ic("tesoura")}</i> SermonCut</div><h1>Conecte a IA que vai analisar as pregações</h1>
-     <p>Use a IA que você já usa. A transcrição, o player e a exportação de cortes são grátis e funcionam no próprio Mac; a IA faz os cortes, o estudo, as frases e o viral. Dá para trocar depois na engrenagem ⚙️.</p>`) +
+     <p>Use a IA que você já usa. A transcrição, o player e a exportação de cortes são grátis e funcionam no próprio computador; a IA faz os cortes, o estudo, as frases e o viral. Dá para trocar depois na engrenagem ⚙️.</p>`) +
     `<div class="ia-grade">${ordem.map(card).join("")}</div>`;
 }
 async function cliqueIA(e, alvo) {
@@ -1282,7 +1359,7 @@ function htmlColar(tipo, id, parte, oque) {
   return `<div class="colar" data-colar="${chave}"><b>Leve o pedido para o ${SITE_NOME[site]}</b>
     <small style="color:var(--txt2)">Você está usando uma conta grátis: ${oque} sai em 3 passos.</small>
     <ol><li><button class="prim" data-copiar-pedido="${chave}">Copiar pedido e abrir o ${SITE_NOME[site]}</button></li>
-      <li>No chat, cole (⌘V) e envie. Espere a resposta terminar.</li>
+      <li>No chat, cole (${COLAR}) e envie. Espere a resposta terminar.</li>
       <li>Copie a resposta inteira e cole aqui embaixo:</li></ol>
     <textarea placeholder="Cole aqui a resposta da IA…"></textarea>
     <button class="prim" data-enviar-colar="${chave}">Enviar resposta</button> <span class="ia-msg"></span></div>`;
@@ -1324,7 +1401,7 @@ async function abrirExport(m) {
   durExport(); $("dlgExp").showModal();
   const f = (await api("/api/fonte/" + P.id)).fontes || [];
   const info = {
-    original: ["", "Exporta do arquivo original do Mac, na qualidade máxima."],
+    original: ["", `Exporta do arquivo original do ${COMPUTADOR}, na qualidade máxima.`],
     drive: ["", "Busca só esse trecho no original do Google Drive, na qualidade máxima. Se o Drive estiver no limite do dia, usa a versão leve."],
     youtube: ["", "Baixa só esse trecho do YouTube na resolução escolhida (até a máxima que o vídeo tiver)."],
     leve: ["aviso2", "Este vídeo só existe na versão leve (540p). Exportar em 1080p ou 4K não melhora a qualidade: para o original, traga o vídeo do computador."],
@@ -1361,8 +1438,9 @@ async function acompanharExport() {
   const fonteTxt = { original: "arquivo original", drive: "original do Drive", youtube: "YouTube", leve: "versão leve (540p)" }[j.fonte] || "";
   if (j.status === "pronto") {
     $("expProg").innerHTML = `<div class="fonte-info ${j.fonte === "leve" ? "aviso2" : ""}">${ic("ok")} Pronto! <b>${esc(j.arquivo.split("/").pop())}</b><br>
-      Fonte: ${fonteTxt} (${esc(j.original)}) · ${j.mbps} Mbps</div><button class="prim" id="expFinder">Mostrar no Finder</button>`;
-    $("expFinder").onclick = () => fetch("/api/revelar", { method: "POST", body: JSON.stringify({ arquivo: j.arquivo }) });
+      Fonte: ${fonteTxt} (${esc(j.original)}) · ${j.mbps} Mbps</div>${REMOTO ? `<a class="prim" style="display:inline-block;padding:8px 14px;border-radius:8px;background:var(--acento);color:#fff;text-decoration:none"
+        href="/api/exportado/${j.id}" download>${ic("baixar")} Baixar no celular</a>` : `<button class="prim" id="expFinder">${SO === "windows" ? "Mostrar na pasta" : "Mostrar no Finder"}</button>`}`;
+    if ($("expFinder")) $("expFinder").onclick = () => fetch("/api/revelar", { method: "POST", body: JSON.stringify({ arquivo: j.arquivo }) });
     expJob = null; $("expOk").disabled = false; $("expOk").textContent = "Exportar outro";
     return;
   }
@@ -1428,6 +1506,7 @@ async function verDownloads() {
 setInterval(verDownloads, 3000); verDownloads();
 
 pintarIcones();
+carregarSistema();
 const q0 = new URLSearchParams(location.search);  // lido antes: abrir() reescreve o endereço
 carregarLista().then(() => {  // ?aba=biblia ou ?modo=canal abrem direto naquela parte
   const q = q0;

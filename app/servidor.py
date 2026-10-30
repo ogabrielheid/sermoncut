@@ -29,6 +29,8 @@ import json, mimetypes, os, re, subprocess, sys, tempfile, time, urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import comum
+
 SIS = Path.home() / "CortesAutomacao" / ".sistema"
 TRANS = SIS / "transcricoes"
 DOWN = SIS / "downloads"
@@ -38,6 +40,7 @@ AJUSTES = SIS / "ajustes.json"
 PADRAO = {"abas": {"momentos": True, "transcricao": True, "estudo": True, "biblia": True, "frases": True, "viral": True},
           "recursos": {"canal": True, "pdf": True, "exportar": True},
           "desempenho": {"modo": "equilibrado"},
+          "celular": {"ativo": False, "pin": ""},
           "sobre": {"nome": "", "texto": "", "instagram": "", "contato": "", "link": ""}}
 
 
@@ -59,16 +62,7 @@ def pasta_de(pid):
     return p
 
 
-def rodar(*args):
-    subprocess.Popen(["nohup", *map(str, args)], start_new_session=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-def escolher_video(prompt):
-    r = subprocess.run(["osascript", "-e", "tell me to activate", "-e",
-                        f'POSIX path of (choose file with prompt "{prompt}" of type {{"public.movie"}})'],
-                       capture_output=True, text=True)
-    return r.stdout.strip() or None
+escolher_video = comum.escolher_video
 
 
 def resumo(p):
@@ -103,9 +97,68 @@ def projeto(p):
     return d
 
 
+PORTAO = """<!doctype html><html lang="pt-br"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>SermonCut</title>
+<link rel="manifest" href="/manifest.json"><link rel="apple-touch-icon" href="/icone.png"><meta name="theme-color" content="#111115">
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111115;color:#ececf1;font:16px -apple-system,Segoe UI,Arial,sans-serif}
+.c{width:min(340px,88vw);text-align:center}img{width:84px;border-radius:20px}h1{font-size:22px;margin:14px 0 6px}
+p{color:#9a9aa8;font-size:14px;line-height:1.5}input{width:100%;box-sizing:border-box;font-size:28px;letter-spacing:.3em;text-align:center;
+padding:12px;border-radius:12px;border:1px solid #2c2c36;background:#1a1a20;color:#fff;margin:10px 0}
+button{width:100%;padding:14px;border:0;border-radius:12px;background:#ff6a13;color:#fff;font-size:16px;font-weight:700}
+#e{color:#ff7b81;min-height:20px;font-size:14px}</style></head><body><div class="c"><img src="/icone.png" alt="">
+<h1>SermonCut</h1><p>Digite o código de acesso que aparece no computador, em ⚙️ › Celular.</p>
+<input id="pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" autofocus><div id="e"></div><button id="b">Entrar</button></div>
+<script>const b=document.getElementById("b"),i=document.getElementById("pin");
+async function entrar(){b.disabled=true;const r=await fetch("/api/entrar",{method:"POST",body:JSON.stringify({pin:i.value})}).then(r=>r.json());
+if(r.ok)location.reload();else{document.getElementById("e").textContent="Código errado. Confira no computador.";b.disabled=false;i.select()}}
+b.onclick=entrar;i.onkeydown=e=>e.key==="Enter"&&entrar();</script></body></html>"""
+MANIFESTO = {"name": "SermonCut", "short_name": "SermonCut", "start_url": "/", "display": "standalone",
+             "background_color": "#111115", "theme_color": "#111115",
+             "icons": [{"src": "/icone.png", "sizes": "1024x1024", "type": "image/png"}]}
+# o que só faz sentido no próprio computador (abre janelas lá, mexe na conta do GitHub...)
+SO_NO_COMPUTADOR = ("/api/novo", "/api/localizar/", "/api/revelar", "/api/ia/login_claude", "/api/publicar",
+                    "/api/pacote", "/api/celular", "/api/atualizar")
+
+
+def enderecos():
+    """Endereços deste computador na rede Wi-Fi (para abrir no celular)."""
+    import socket
+    ips = set()
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(("8.8.8.8", 80))  # não envia nada: só descobre qual placa de rede sai para a internet
+            ips.add(sk.getsockname()[0])
+    except OSError:
+        pass
+    return [f"http://{ip}:{PORTA}" for ip in sorted(ips) if not ip.startswith("127.")]
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
+
+    def remoto(self):
+        return self.client_address[0] not in ("127.0.0.1", "::1", "::ffff:127.0.0.1")
+
+    def liberado(self):
+        """No próprio computador sempre; no celular só com o código de acesso (guardado num cookie)."""
+        if not self.remoto():
+            return True
+        cel = ajustes()["celular"]
+        if not cel["ativo"] or not cel["pin"]:
+            return False
+        cookies = dict(c.strip().split("=", 1) for c in self.headers.get("Cookie", "").split(";") if "=" in c)
+        return cookies.get("sc_pin") == cel["pin"]
+
+    def portao(self):
+        if self.path.startswith(("/api/", "/video/")):
+            return self.json({"erro": "digite o código de acesso"}, 401)
+        b = PORTAO.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
 
     def json(self, obj, code=200):
         b = json.dumps(obj, ensure_ascii=False).encode()
@@ -117,6 +170,18 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
+            if self.path == "/manifest.json":
+                return self.json(MANIFESTO)
+            if self.path == "/icone.png":
+                b = (SIS / "icone.png").read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(b)))
+                self.send_header("Cache-Control", "max-age=86400")
+                self.end_headers()
+                return self.wfile.write(b)
+            if not self.liberado():
+                return self.portao()
             if self.path in ("/", "/index.html") or self.path.startswith("/?"):
                 b = (SIS / "interface.html").read_bytes()
                 self.send_response(200)
@@ -154,7 +219,7 @@ class H(BaseHTTPRequestHandler):
             elif self.path.startswith("/api/atualizacao"):
                 import atualizar
                 info = atualizar.verificar(forcar="forcar" in self.path)
-                gh = Path.home() / ".local" / "bin" / "gh"
+                gh = comum.LOCAL / f"gh{comum.EXE}"
                 info["pode_publicar"] = (SIS / "publicar.sh").exists() and gh.exists() and \
                     subprocess.run([str(gh), "auth", "status"], capture_output=True).returncode == 0
                 self.json(info)
@@ -167,6 +232,27 @@ class H(BaseHTTPRequestHandler):
                 if not arq.resolve().is_relative_to(SIS) or not arq.exists():
                     raise FileNotFoundError
                 self.json({"texto": arq.read_text()})
+            elif self.path == "/api/sistema":
+                self.json({"so": "windows" if comum.WINDOWS else "mac", "remoto": self.remoto()})
+            elif self.path == "/api/celular":
+                if self.remoto():
+                    return self.json({"erro": "só no computador"}, 403)
+                cel = ajustes()["celular"]
+                self.json({**cel, "enderecos": enderecos()})
+            elif self.path.startswith("/api/exportado/"):
+                # baixa um corte exportado (útil no celular)
+                j = json.loads((EXPORT / f"{self.path.split('/')[3]}.json").read_text())
+                arq = Path(j.get("arquivo", ""))
+                if j.get("status") != "pronto" or arq.parent.name != "CORTES EXPORTADOS" or not arq.is_file():
+                    raise FileNotFoundError
+                self.send_response(200)
+                self.send_header("Content-Type", "video/mp4")
+                self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{urllib.parse.quote(arq.name)}")
+                self.send_header("Content-Length", str(arq.stat().st_size))
+                self.end_headers()
+                with open(arq, "rb") as f:
+                    while bloco := f.read(1 << 20):
+                        self.wfile.write(bloco)
             elif self.path == "/api/config":
                 self.json({"tem_chave": (SIS / "youtube_chave.txt").exists()})
             elif self.path == "/api/canais":
@@ -239,17 +325,45 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             partes = self.path.split("/")
+            if self.path == "/api/entrar":
+                corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
+                cel = ajustes()["celular"]
+                if cel["ativo"] and cel["pin"] and str(corpo.get("pin", "")).strip() == cel["pin"]:
+                    b = b'{"ok": true}'
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Set-Cookie", f"sc_pin={cel['pin']}; Max-Age=31536000; Path=/; SameSite=Lax; HttpOnly")
+                    self.send_header("Content-Length", str(len(b)))
+                    self.end_headers()
+                    return self.wfile.write(b)
+                time.sleep(1.5)  # atrasa quem tenta adivinhar
+                return self.json({"ok": False})
+            if not self.liberado():
+                return self.json({"erro": "digite o código de acesso"}, 401)
+            if self.remoto() and self.path.startswith(SO_NO_COMPUTADOR):
+                return self.json({"erro": "isso só dá para fazer no computador"}, 403)
+            if self.path == "/api/celular":
+                import random
+                corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
+                aj = ajustes()
+                aj["celular"]["ativo"] = bool(corpo.get("ativo"))
+                if corpo.get("novo_pin") or not aj["celular"]["pin"]:
+                    aj["celular"]["pin"] = f"{random.SystemRandom().randrange(10 ** 6):06d}"
+                AJUSTES.write_text(json.dumps(aj, ensure_ascii=False, indent=1))
+                self.json({**aj["celular"], "enderecos": enderecos()})
+                comum.python_script("abrir.py", "--so-servidor")  # religa ouvindo (ou não) a rede Wi-Fi
+                return
             if self.path == "/api/novo":
                 v = escolher_video("Escolha o vídeo da pregação:")
                 if v:
-                    rodar(SIS / "processar.sh", v)
+                    comum.python_script("processar.py", v)
                 self.json({"video": v})
             elif self.path == "/api/drive":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
                 links = [l.strip() for l in corpo.get("links", []) if l.strip()]
                 projeto = [pasta_de(corpo["projeto"]).name] if corpo.get("projeto") else []
                 for l in links:
-                    rodar(sys.executable, SIS / "baixar_drive.py", l, *projeto)
+                    comum.python_script("baixar_drive.py", l, *projeto)
                 self.json({"links": len(links)})
             elif self.path == "/api/exportar":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
@@ -262,7 +376,7 @@ class H(BaseHTTPRequestHandler):
                 arq.write_text(json.dumps(pedido, ensure_ascii=False))
                 (EXPORT / f"{pedido['id']}.json").write_text(json.dumps(dict(pedido, status="na fila", progresso=0,
                                                                               quando=time.time()), ensure_ascii=False))
-                rodar(sys.executable, SIS / "exportar.py", arq)
+                comum.python_script("exportar.py", arq)
                 self.json({"id": pedido["id"]})
             elif self.path == "/api/ajustes":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
@@ -286,12 +400,8 @@ class H(BaseHTTPRequestHandler):
                     ia.salvar(cfg)
                 self.json({"ok": ok, "msg": msg, "ia": ia.publico()})
             elif self.path == "/api/ia/login_claude":
-                # abre o Terminal com o Claude para a pessoa entrar na conta (assinatura Pro)
-                cmd = SIS / "login_claude.command"
-                cmd.write_text(f'#!/bin/bash\ncd "{SIS}"\necho "Entre na sua conta Claude. Quando terminar, digite /exit e aperte Enter."\n'
-                               f'"$HOME/.local/bin/claude"\n')
-                cmd.chmod(0o755)
-                subprocess.run(["open", str(cmd)])
+                # abre um terminal com o Claude para a pessoa entrar na conta (assinatura Pro)
+                comum.abrir_terminal(f'"{comum.claude()}"', SIS)
                 self.json({"ok": True})
             elif self.path == "/api/colar":
                 import gerar, canal
@@ -319,9 +429,7 @@ class H(BaseHTTPRequestHandler):
                 r = atualizar.aplicar()
                 self.json(r)
                 if r.get("atualizado"):  # reinicia com o código novo (a página recarrega sozinha)
-                    subprocess.Popen(["bash", "-c", f"sleep 1; kill {os.getpid()}; sleep 1; "
-                                      f"nohup '{sys.executable}' '{SIS / 'servidor.py'}' >> '{SIS / 'log.txt'}' 2>&1 &"],
-                                     start_new_session=True)
+                    comum.python_script("abrir.py", "--so-servidor")
             elif self.path == "/api/publicar":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
                 r = subprocess.run([str(SIS / "publicar.sh"), corpo.get("notas", "").strip() or "Melhorias e correções."],
@@ -333,13 +441,13 @@ class H(BaseHTTPRequestHandler):
                 r = subprocess.run([str(SIS / "gerar_pacote.sh")], capture_output=True, text=True)
                 zipf = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
                 if zipf and Path(zipf).exists():
-                    subprocess.run(["open", "-R", zipf])
+                    comum.revelar(zipf)
                 self.json({"zip": zipf})
             elif self.path == "/api/revelar":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
                 arq = Path(corpo.get("arquivo", ""))
                 if arq.is_file() and arq.parent.name == "CORTES EXPORTADOS":
-                    subprocess.run(["open", "-R", str(arq)])
+                    comum.revelar(arq)
                 self.json({"ok": True})
             elif self.path == "/api/canal":
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
@@ -348,12 +456,12 @@ class H(BaseHTTPRequestHandler):
                 extra.write_text(corpo.get("extra", ""))
                 if corpo.get("chave", "").strip():
                     (SIS / "youtube_chave.txt").write_text(corpo["chave"].strip())
-                rodar(sys.executable, SIS / "canal.py", corpo.get("youtube", ""), extra)
+                comum.python_script("canal.py", corpo.get("youtube", ""), extra)
                 self.json({"ok": True})
             elif self.path.startswith("/api/gerar/") and len(partes) > 4 and partes[4] in ("conteudo", "viral", "biblia"):
                 p = pasta_de(partes[3])
                 (p / f"{partes[4]}_status").write_text("gerando")
-                rodar(sys.executable, SIS / "gerar.py", p, partes[4])
+                comum.python_script("gerar.py", p, partes[4])
                 self.json({"ok": True})
             elif self.path.startswith("/api/localizar/"):
                 p = pasta_de(partes[3])
@@ -368,4 +476,6 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    ThreadingHTTPServer(("127.0.0.1", PORTA), H).serve_forever()
+    (SIS / ".servidor.pid").write_text(str(os.getpid()))
+    # com o acesso pelo celular ligado, também atende a rede Wi-Fi (protegido pelo código de acesso)
+    ThreadingHTTPServer(("0.0.0.0" if ajustes()["celular"]["ativo"] else "127.0.0.1", PORTA), H).serve_forever()

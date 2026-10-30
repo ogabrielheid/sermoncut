@@ -7,7 +7,7 @@ O vídeo original (5 a 10 GB) não é salvo: o ffmpeg lê direto do Drive e grav
 Um de cada vez (fila). O andamento fica em .sistema/downloads/<id>.json (a interface mostra).
 O link precisa estar compartilhado como "Qualquer pessoa com o link".
 """
-import fcntl, html, json, os, re, shutil, subprocess, sys, time, urllib.error, urllib.request
+import html, json, os, re, shutil, subprocess, sys, time, urllib.error, urllib.request
 from email.message import Message
 from pathlib import Path
 
@@ -16,7 +16,6 @@ import comum
 SIS = Path.home() / "CortesAutomacao" / ".sistema"
 VIDEOS = Path.home() / "CortesAutomacao" / "videos"
 DOWN = SIS / "downloads"
-FFMPEG = SIS / "bin" / "ffmpeg"
 TRANS = SIS / "transcricoes"
 UA = "Mozilla/5.0"
 VIDEO_EXT = (".mp4", ".mov", ".m4v", ".mkv", ".mxf", ".avi", ".mts")
@@ -75,8 +74,7 @@ def entregar(fid, destino, projeto, link):
     if projeto and (TRANS / projeto).is_dir():
         (TRANS / projeto / "video.txt").write_text(str(destino))
     else:
-        subprocess.Popen(["nohup", str(SIS / "processar.sh"), str(destino)], start_new_session=True,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        comum.python_script("processar.py", destino)
 
 
 def baixar_youtube(link, projeto=None):
@@ -89,14 +87,13 @@ def baixar_youtube(link, projeto=None):
     VIDEOS.mkdir(parents=True, exist_ok=True)
     salvar(fid, link=link, nome="Vídeo do YouTube", status="na fila", progresso=0)
     try:
-        with open(DOWN / ".fila", "w") as trava:
-            fcntl.flock(trava, fcntl.LOCK_EX)  # um vídeo por vez
+        with comum.trava("downloads"):  # um vídeo por vez
             if shutil.disk_usage(VIDEOS).free < 3 * 1024 ** 3:
                 raise RuntimeError("o Mac está com menos de 3 GB livres")
             salvar(fid, status="baixando")
             base, env = comum.ytdlp()
             # versão leve (até 540p na horizontal), suficiente para assistir no app e transcrever
-            p = subprocess.Popen([*base, "--no-playlist", "--ffmpeg-location", str(FFMPEG),
+            p = subprocess.Popen([*base, "--no-playlist", "--ffmpeg-location", comum.ffmpeg(),
                                   "-f", "bv*[width<=960][height<=960][vcodec^=avc1]+ba[ext=m4a]/b[width<=960][height<=960]/b",
                                   "--merge-output-format", "mp4", "-o", str(VIDEOS / "%(title).80s.%(ext)s"),
                                   "--newline", "--progress-template", "download:PCT %(progress._percent_str)s",
@@ -147,19 +144,18 @@ def baixar(link, projeto=None):
         destino = VIDEOS / (Path(nome).stem + ".mp4")
         salvar(fid, nome=nome)
 
-        with open(DOWN / ".fila", "w") as trava:
-            fcntl.flock(trava, fcntl.LOCK_EX)  # um vídeo do Drive por vez
+        with comum.trava("downloads"):  # um vídeo do Drive por vez
             if shutil.disk_usage(VIDEOS).free < 3 * 1024 ** 3:
                 raise RuntimeError("o Mac está com menos de 3 GB livres")
             salvar(fid, status="baixando")
-            info = subprocess.run([str(FFMPEG), "-hide_banner", "-user_agent", UA, "-i", url],
+            info = subprocess.run([comum.ffmpeg(), "-hide_banner", "-user_agent", UA, "-i", url],
                                   capture_output=True, text=True).stderr
             m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", info)
             total = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3)) if m else 0
             parcial = destino.with_name(destino.stem + ".baixando.mp4")
-            p = subprocess.Popen([str(FFMPEG), "-hide_banner", "-loglevel", "error", "-y", "-user_agent", UA,
+            p = subprocess.Popen([comum.ffmpeg(), "-hide_banner", "-loglevel", "error", "-y", "-user_agent", UA,
                                   "-reconnect", "1", "-reconnect_delay_max", "30",
-                                  "-i", url, "-vf", "scale=-2:540", "-c:v", "h264_videotoolbox", "-b:v", "1200k",
+                                  "-i", url, "-vf", "scale=-2:540", *comum.args_h264(1.2),
                                   "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", "-progress", "pipe:1",
                                   str(parcial)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             ultimo = 0

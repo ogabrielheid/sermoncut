@@ -9,9 +9,13 @@
   Para quem edita os vídeos da igreja local.
 </p>
 
-<p align="center">
-  <a href="https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut.zip"><b>⬇ Baixar o SermonCut para Mac (versão 1.0)</b></a>
-</p>
+## Downloads · versão 1.1
+
+| | |
+|---|---|
+| 🍎 **Mac** (chip Apple M1 ou mais novo) | [**Baixar SermonCut.zip**](https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut.zip) |
+| 🪟 **Windows** 10 ou 11 (64 bits) | [**Baixar SermonCut-Windows.zip**](https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut-Windows.zip) |
+| 📱 **Celular** (Android e iPhone) | [Como abrir no celular](#no-celular-android-e-iphone): usa o SermonCut do seu computador pelo Wi‑Fi |
 
 ---
 
@@ -48,6 +52,8 @@ O vídeo pode vir do computador, de um link do **Google Drive** (vídeo ou pasta
 
 ## Como instalar
 
+### No Mac
+
 **Precisa de:** Mac com chip Apple (M1 ou mais novo), Google Chrome e uns 3 GB livres.
 
 1. [Baixe o **SermonCut.zip**](https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut.zip) e dê dois cliques para abrir.
@@ -56,6 +62,37 @@ O vídeo pode vir do computador, de um link do **Google Drive** (vídeo ou pasta
 3. Siga a janela que abrir. Leva uns 5 minutos e instala tudo sozinho.
 4. O ícone **SermonCut** aparece na Mesa. Abra e escolha a **IA das análises**.
 5. Pronto: arraste o vídeo de um culto em cima do ícone, ou traga pelo Drive ou YouTube.
+
+### No Windows
+
+**Precisa de:** Windows 10 ou 11 (64 bits) e uns 3 GB livres. O app abre no Microsoft Edge, que já vem no Windows.
+
+1. [Baixe o **SermonCut-Windows.zip**](https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut-Windows.zip).
+2. Clique com o botão direito no arquivo › **Extrair tudo**.
+3. Na pasta extraída, dê dois cliques em **Instalar SermonCut.bat**.
+   Se aparecer "O Windows protegeu o computador", clique em **Mais informações › Executar assim mesmo**.
+4. Siga a janela que abrir. Leva uns 5 minutos e instala tudo sozinho.
+5. O atalho **SermonCut** aparece na Área de Trabalho e no menu Iniciar. Abra e escolha a **IA das análises**.
+6. Pronto: arraste o vídeo de um culto em cima do atalho, ou traga pelo Drive ou YouTube.
+
+> A versão para Windows é nova. Se algo não funcionar, fale com o criador (contato no fim da página).
+
+### No celular (Android e iPhone)
+
+<img src="docs/celular.jpg" width="260" align="right" alt="SermonCut no celular">
+
+O celular usa o SermonCut instalado no seu computador, pelo Wi‑Fi. O computador faz o trabalho pesado
+(transcrever e analisar), então ele precisa estar ligado, com o app aberto, na mesma rede do celular.
+
+1. No computador, abra o SermonCut › engrenagem ⚙️ › **Abrir no celular** e ligue a opção.
+   Aparecem um **endereço** (ex.: `http://192.168.0.10:47615`) e um **código de acesso**.
+2. No celular, abra o **Safari** (iPhone) ou o **Chrome** (Android), digite o endereço e depois o código.
+3. Para ficar com ícone de app:
+   **iPhone:** Compartilhar › **Adicionar à Tela de Início** · **Android:** ⋮ › **Adicionar à tela inicial**.
+
+No celular dá para assistir aos cortes, ler a transcrição, o estudo, a Bíblia e as frases, copiar textos,
+trazer cultos pelo Drive ou YouTube e exportar cortes (o arquivo é baixado no celular).
+<br clear="right">
 
 ## Qual IA usar
 
@@ -77,8 +114,9 @@ Seus vídeos, transcrições, cortes e configurações continuam como estão.
 
 ## Privacidade
 
-Tudo roda no seu Mac. Os vídeos não são enviados para lugar nenhum. Para as análises, só o texto da
-transcrição vai para a IA que você escolher. Suas chaves ficam guardadas só no seu computador.
+Tudo roda no seu computador. Os vídeos não são enviados para lugar nenhum. Para as análises, só o texto da
+transcrição vai para a IA que você escolher. Suas chaves ficam guardadas só no seu computador. O acesso pelo celular fica desligado até você ligar,
+e é protegido por um código.
 
 ## Quem criou
 
