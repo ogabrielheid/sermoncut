@@ -41,7 +41,7 @@ PADRAO = {"abas": {"momentos": True, "transcricao": True, "estudo": True, "bibli
           "recursos": {"canal": True, "pdf": True, "exportar": True},
           "desempenho": {"modo": "equilibrado"},
           "celular": {"ativo": False, "pin": ""},
-          "sobre": {"nome": "", "texto": "", "instagram": "", "contato": "", "link": ""}}
+          "sobre": {"nome": "", "texto": "", "instagram": "", "whatsapp": "", "contato": "", "link": ""}}
 
 
 def ajustes():
@@ -216,6 +216,10 @@ class H(BaseHTTPRequestHandler):
                 self.json(sorted([j for j in js if time.time() - j.get("quando", 0) < 6 * 3600], key=lambda j: -j["quando"]))
             elif self.path == "/api/ajustes":
                 self.json(ajustes())
+            elif self.path == "/api/criador":
+                # quem criou o app e o serviço de finalização (vem com as atualizações)
+                arq = SIS / "criador.json"
+                self.json(json.loads(arq.read_text()) if arq.exists() else ajustes()["sobre"])
             elif self.path.startswith("/api/atualizacao"):
                 import atualizar
                 info = atualizar.verificar(forcar="forcar" in self.path)
@@ -382,6 +386,11 @@ class H(BaseHTTPRequestHandler):
                 corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
                 novo = {k: {c: corpo.get(k, {}).get(c, v) for c, v in PADRAO[k].items()} for k in PADRAO}
                 AJUSTES.write_text(json.dumps(novo, ensure_ascii=False, indent=1))
+                if not self.remoto() and (SIS / "publicar.sh").exists():  # no Mac de quem criou: o contato que vai para todos
+                    arq = SIS / "criador.json"
+                    c = json.loads(arq.read_text()) if arq.exists() else {}
+                    c.update({k: novo["sobre"].get(k, "") for k in ("nome", "instagram", "whatsapp", "texto", "link")})
+                    arq.write_text(json.dumps(c, ensure_ascii=False, indent=1))
                 self.json(novo)
             elif self.path == "/api/ia":
                 import ia

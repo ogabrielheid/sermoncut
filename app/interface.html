@@ -266,6 +266,25 @@ header { height: 56px; }
   border: 1px solid var(--acento); border-radius: 14px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.5); }
 #novaVersao b { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 #novaVersao p { color: var(--txt2); font-size: 12.5px; margin: 6px 0 10px; line-height: 1.45; max-height: 90px; overflow: auto; white-space: pre-line; }
+.convite { display: flex; gap: 12px; align-items: center; margin: 0 0 10px; padding: 11px 13px; border-radius: 12px;
+  background: linear-gradient(120deg, #2b2014, #241a2c); border: 1px solid #4d3518; }
+.convite > svg.ic { width: 26px; height: 26px; color: var(--acento2); }
+.convite b { display: block; font-size: 13px; }
+.convite small { color: var(--txt2); font-size: 11.5px; line-height: 1.4; display: block; }
+.convite .bts2 { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+.convite button, .convite a.btn { padding: 4px 10px; font-size: 11.5px; }
+a.btn { display: inline-flex; gap: 5px; align-items: center; border: 1px solid var(--borda); border-radius: 7px; background: var(--painel2);
+  color: var(--txt); text-decoration: none; padding: 6px 12px; }
+.card .acoes { flex-wrap: wrap; }
+.card .acoes button { white-space: nowrap; }
+button.fin { border-color: #6b4419; color: var(--acento2); }
+button.fin:hover { background: #2b2014; border-color: var(--acento); }
+#dlgFin { width: 480px; }
+#dlgFin .lista-fin { margin: 8px 0 14px; padding-left: 18px; color: var(--txt2); line-height: 1.7; }
+#dlgFin .pedido { background: var(--painel2); border: 1px solid var(--borda); border-radius: 9px; padding: 10px 12px; font-size: 12.5px;
+  white-space: pre-line; margin-bottom: 14px; user-select: text; }
+#dlgFin .bts { justify-content: stretch; flex-wrap: wrap; }
+#dlgFin .bts > * { flex: 1; justify-content: center; text-align: center; }
 body.remoto .so-local { display: none !important; }
 @media (max-width: 820px) {
   html, body { height: auto; }
@@ -417,6 +436,7 @@ footer { background: var(--painel); border-top: 1px solid var(--borda); padding:
   <div class="cres" id="cres"><div class="vazio" style="padding-top:120px">Cole o link do canal ao lado para começar.<br>Leva uns 2 a 4 minutos.</div></div>
 </section>
 <div class="dica" id="dica"></div>
+<dialog id="dlgFin"></dialog>
 <div id="iaView" hidden></div>
 <div id="novaVersao" hidden></div>
 <dialog id="dlgAjustes"><div class="aj">
@@ -663,14 +683,14 @@ function desenharLista() {
         "Os momentos aparecem aqui quando a transcrição terminar.<br>Enquanto isso, veja a aba Transcrição."}</div>`;
       return;
     }
-    L.innerHTML = ms.map(m => `
+    L.innerHTML = htmlConvite() + ms.map(m => `
       <div class="card ${atual === m ? "on" : ""}" data-n="${m.n}" style="--cor:${m.cor}">
         <div class="l1"><span class="n">${String(m.n).padStart(2, "0")}</span><h3>${esc(m.titulo)}</h3></div>
         <div class="meta"><b>${esc(m.inicio)} → ${esc(m.fim)}</b><span>${m.b - m.a} s</span>
           <span class="tema">${esc(m.tema)}</span><span class="estrelas">${"★".repeat(m.potencial || 0)}</span>${m.viral ? `<span class="fogo" style="color:${corNota(m.viral.nota)}">${ic("fogo")} ${m.viral.nota}</span>` : ""}</div>
         <q>${esc(m.gancho)}</q>
         <div class="pq">${esc(m.porque)}</div>
-        <div class="acoes"><button class="prim" data-play="${m.n}">${ic("play")} Assistir</button><button data-ver="${m.n}">Ver na transcrição</button><button data-exp="${m.n}">${ic("baixar")} Exportar</button></div>
+        <div class="acoes"><button class="prim" data-play="${m.n}">${ic("play")} Assistir</button><button data-ver="${m.n}">Ver na transcrição</button><button data-exp="${m.n}">${ic("baixar")} Exportar</button><button class="fin" data-fin="${m.n}">${ic("ia")} Quero finalizado</button></div>
       </div>`).join("");
   } else {
     const q = $("q").value.trim().toLowerCase();
@@ -852,6 +872,8 @@ $("lista").onclick = e => {
   const play = e.target.closest("[data-play]"), ver = e.target.closest("[data-ver]");
   const card = e.target.closest(".card"), fr = e.target.closest(".frase");
   if (play) return tocarFila([momentos[play.dataset.play - 1]]);
+  const fin = e.target.closest("[data-fin]");
+  if (fin) return abrirFinalizacao(fin.dataset.fin === "todos" ? null : momentos[fin.dataset.fin - 1]);
   const ex = e.target.closest("[data-exp]");
   if (ex) return abrirExport(momentos[ex.dataset.exp - 1]);
   const t = e.target.closest("[data-t]"), cp = e.target.closest("[data-copiar]"), ger = e.target.closest("[data-gerar]");
@@ -1087,6 +1109,50 @@ async function carregarSistema() {
   document.body.classList.toggle("remoto", REMOTO);
 }
 
+// ---------- finalização profissional (o serviço de quem criou o app) ----------
+let CRIADOR = {};
+api("/api/criador").then(c => { CRIADOR = c || {}; if (aba === "momentos" && P) desenharLista(); }).catch(() => {});
+const instaDe = c => (c.instagram || "").replace(/^@/, "").trim();
+function zapDe(c) {
+  let n = (c.whatsapp || "").replace(/\D/g, "");
+  if (n.length === 10 || n.length === 11) n = "55" + n;  // número do Brasil sem o código do país
+  return n.length >= 12 ? n : "";
+}
+function htmlConvite() {
+  if (!CRIADOR.nome || (!instaDe(CRIADOR) && !zapDe(CRIADOR))) return "";
+  return `<div class="convite">${ic("ia")}<div><b>Quer esses cortes prontos para postar?</b>
+    <small>Legendas dinâmicas, música, efeitos e enquadramento, feitos por ${esc(CRIADOR.nome.split(" ")[0])}, o editor que criou o SermonCut.</small>
+    <div class="bts2">${instaDe(CRIADOR) ? `<a class="btn" target="_blank" href="https://instagram.com/${esc(instaDe(CRIADOR))}">${ic("instagram")} Ver exemplos</a>` : ""}
+      <button class="prim" data-fin="todos">Pedir orçamento</button></div></div></div>`;
+}
+function abrirFinalizacao(m) {
+  const c = CRIADOR, nome1 = (c.nome || "").split(" ")[0], culto = P?.analise?.titulo || P?.titulo || "";
+  const msg = `Olá${nome1 ? ", " + nome1 : ""}! Encontrei você pelo SermonCut e quero ` + (m ?
+    `este corte finalizado (legenda dinâmica, música e efeitos):\n• Culto: ${culto}\n• Corte ${String(m.n).padStart(2, "0")}: "${m.titulo}" (${m.inicio} → ${m.fim})` :
+    `um orçamento para finalizar os cortes da minha igreja${culto ? ` (culto: ${culto})` : ""}.`);
+  const zap = zapDe(c), insta = instaDe(c);
+  textos.pedidoFin = msg;
+  $("dlgFin").innerHTML = `<h2>${ic("ia")} ${m ? "Quero esse corte finalizado" : "Finalização profissional"}</h2>
+    <p>${esc(c.nome || "O editor")} transforma o corte em vídeo pronto para postar:</p>
+    <ul class="lista-fin"><li>legendas dinâmicas no estilo dos virais</li><li>música e efeitos sonoros</li>
+      <li>enquadramento vertical no pregador</li><li>gancho forte nos primeiros segundos</li></ul>
+    <small style="color:var(--txt2)">A mensagem do pedido:</small><div class="pedido">${esc(msg)}</div>
+    <div class="bts">
+      ${insta ? `<a class="btn" target="_blank" href="https://instagram.com/${esc(insta)}">${ic("instagram")} Ver exemplos</a>` : ""}
+      ${zap ? `<a class="btn prim" style="background:#25d366;border-color:#25d366;color:#fff" target="_blank"
+          href="https://wa.me/${zap}?text=${encodeURIComponent(msg)}">${ic("chat")} Pedir pelo WhatsApp</a>` : ""}
+      ${insta ? `<button ${zap ? "" : 'class="prim"'} id="finInsta">${ic("instagram")} Pedir pelo Instagram</button>` : ""}
+      <button id="finFechar">Fechar</button></div>
+    <small id="finMsg" style="color:var(--txt2);display:block;margin-top:8px"></small>`;
+  $("dlgFin").showModal();
+  $("finFechar").onclick = () => $("dlgFin").close();
+  if ($("finInsta")) $("finInsta").onclick = async () => {  // o Instagram não aceita texto pronto: copia e abre a conversa
+    await navigator.clipboard.writeText(msg).catch(() => {});
+    $("finMsg").textContent = `Mensagem copiada: cole na conversa (${COLAR}) e envie.`;
+    window.open(`https://ig.me/m/${insta}`, "_blank");
+  };
+}
+
 // ---------- configurações (engrenagem) ----------
 let AJ = null, secaoAj = "abas", editandoSobre = false;
 const ABAS = [["momentos", "Cortes", "Os momentos sugeridos para cortar"], ["transcricao", "Transcrição", "Texto clicável da pregação"],
@@ -1140,19 +1206,22 @@ function desenharAjustes() {
       <p style="margin-top:16px"><button id="ajPadrao">${ic("refazer")} Voltar ao padrão</button></p>`;
     return;
   }
-  const S = AJ.sobre, link = S.link;
+  const S = ATU?.pode_publicar ? AJ.sobre : { ...AJ.sobre, ...CRIADOR }, link = S.link;
   const contato = [S.instagram && `<a href="https://instagram.com/${esc(S.instagram.replace(/^@/, ""))}" target="_blank">${ic("instagram")} ${esc(S.instagram)}</a>`,
-    S.contato && `<span>${ic("chat")} ${esc(S.contato)}</span>`].filter(Boolean).join(" · ");
+    zapDe(S) && `<a href="https://wa.me/${zapDe(S)}" target="_blank">${ic("chat")} WhatsApp</a>`,
+    S.contato && `<span>${ic("chat")} ${esc(S.contato)}</span>`].filter(Boolean).join(" · ") +
+    (CRIADOR.nome && !editandoSobre ? `<p style="margin-top:10px"><button class="fin" data-fin-sobre>${ic("ia")} Contratar a finalização dos cortes</button></p>` : "");
   C.innerHTML = `<div class="sobre-topo"><div class="logo">${ic("tesoura")}</div><div><h3>SermonCut</h3>
       <small style="color:var(--txt2)">Versão ${esc(ATU?.atual || "")} · cortes, estudos e conteúdo a partir da pregação</small>
       <div style="margin-top:6px">${ATU?.nova ? `<button class="prim" id="ajAtualizar">Atualizar para a versão ${esc(ATU.versao)}</button>` :
         `<button id="ajProcurar">${ic("refazer")} Procurar atualização</button> <small id="ajAtuMsg" style="color:var(--txt2)"></small>`}</div></div></div>
-    <h4>Quem criou${editandoSobre ? "" : ` <a href="#" id="ajEditar" style="text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px">editar</a>`}</h4>
+    <h4>Quem criou${editandoSobre || !ATU?.pode_publicar ? "" : ` <a href="#" id="ajEditar" style="text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px">editar</a>`}</h4>
     ${editandoSobre ? `
       <label class="campo">Seu nome<input id="sbNome" value="${esc(S.nome)}"></label>
       <label class="campo">Sobre você<textarea id="sbTexto">${esc(S.texto)}</textarea></label>
       <label class="campo">Instagram<input id="sbInsta" value="${esc(S.instagram)}" placeholder="@seuperfil"></label>
-      <label class="campo">Contato (WhatsApp ou e-mail)<input id="sbContato" value="${esc(S.contato)}"></label>
+      <label class="campo">WhatsApp para pedidos de finalização (com DDD)<input id="sbZap" value="${esc(S.whatsapp || "")}" placeholder="(19) 99999-9999"></label>
+      <label class="campo">Outro contato (e-mail, opcional)<input id="sbContato" value="${esc(S.contato)}"></label>
       <label class="campo">Link para baixar o app<input id="sbLink" value="${esc(S.link)}" placeholder="https://…"></label>
       <button class="prim" id="ajSalvarSobre">Salvar</button>` :
       S.nome ? `<p style="margin:0 0 6px"><b>${esc(S.nome)}</b></p><p style="margin:0 0 6px;color:var(--txt2);line-height:1.5">${esc(S.texto)}</p><p style="margin:0">${contato}</p>` :
@@ -1223,10 +1292,11 @@ $("ajConteudo").onclick = async e => {
   if (id === "ajEditar") { e.preventDefault(); editandoSobre = true; desenharAjustes(); }
   if (id === "ajSalvarSobre") {
     AJ.sobre = { nome: $("sbNome").value.trim(), texto: $("sbTexto").value.trim(), instagram: $("sbInsta").value.trim(),
-      contato: $("sbContato").value.trim(), link: $("sbLink").value.trim() };
+      contato: $("sbContato").value.trim(), whatsapp: $("sbZap").value.trim(), link: $("sbLink").value.trim() };
     await salvarAjustes(); editandoSobre = false; desenharAjustes();
   }
   if (id === "ajCopiarLink") copiar(AJ.sobre.link, e.target);
+  if (e.target.closest("[data-fin-sobre]")) { $("dlgAjustes").close(); return abrirFinalizacao(null); }
   if (id === "celNovoPin") {
     CEL = await fetch("/api/celular", { method: "POST", body: JSON.stringify({ ativo: true, novo_pin: true }) }).then(r => r.json());
     await new Promise(r => setTimeout(r, 2500)); desenharAjustes();
@@ -1438,8 +1508,11 @@ async function acompanharExport() {
   const fonteTxt = { original: "arquivo original", drive: "original do Drive", youtube: "YouTube", leve: "versão leve (540p)" }[j.fonte] || "";
   if (j.status === "pronto") {
     $("expProg").innerHTML = `<div class="fonte-info ${j.fonte === "leve" ? "aviso2" : ""}">${ic("ok")} Pronto! <b>${esc(j.arquivo.split("/").pop())}</b><br>
-      Fonte: ${fonteTxt} (${esc(j.original)}) · ${j.mbps} Mbps</div>${REMOTO ? `<a class="prim" style="display:inline-block;padding:8px 14px;border-radius:8px;background:var(--acento);color:#fff;text-decoration:none"
+      Fonte: ${fonteTxt} (${esc(j.original)}) · ${j.mbps} Mbps</div>
+      ${CRIADOR.nome ? `<p style="margin:0 0 10px;font-size:12.5px;color:var(--txt2)">Não tem tempo de editar? <a href="#" id="expFin">Peça esse corte finalizado</a> com legenda dinâmica e música.</p>` : ""}${REMOTO ? `<a class="prim" style="display:inline-block;padding:8px 14px;border-radius:8px;background:var(--acento);color:#fff;text-decoration:none"
         href="/api/exportado/${j.id}" download>${ic("baixar")} Baixar no celular</a>` : `<button class="prim" id="expFinder">${SO === "windows" ? "Mostrar na pasta" : "Mostrar no Finder"}</button>`}`;
+    if ($("expFin")) $("expFin").onclick = ev => { ev.preventDefault(); $("dlgExp").close();
+      abrirFinalizacao(momentos.find(m => Math.abs(m.a - j.inicio) < 2 && Math.abs(m.b - j.fim) < 3) || null); };
     if ($("expFinder")) $("expFinder").onclick = () => fetch("/api/revelar", { method: "POST", body: JSON.stringify({ arquivo: j.arquivo }) });
     expJob = null; $("expOk").disabled = false; $("expOk").textContent = "Exportar outro";
     return;

@@ -31,14 +31,20 @@ else
 fi
 echo "$NOVA" > "$SIS/VERSAO"
 
-# o "Sobre" de quem baixar aponta para a página do projeto
+# o "Sobre" de quem baixar aponta para a página do projeto; criador.json leva o seu contato
+# (nome, Instagram, WhatsApp) para todo mundo, inclusive para quem só recebe a atualização
 "$SIS/venv/bin/python" - "$REPO" <<'PY'
 import json, sys
 from pathlib import Path
-a = Path.home() / "CortesAutomacao" / ".sistema" / "ajustes.json"
+sis = Path.home() / "CortesAutomacao" / ".sistema"
+a = sis / "ajustes.json"
 d = json.loads(a.read_text()) if a.exists() else {}
-d.setdefault("sobre", {})["link"] = f"https://github.com/{sys.argv[1]}"
+s = d.setdefault("sobre", {})
+s["link"] = f"https://github.com/{sys.argv[1]}"
 a.write_text(json.dumps(d, ensure_ascii=False, indent=1))
+c = json.loads((sis / "criador.json").read_text()) if (sis / "criador.json").exists() else {}
+c.update({k: s.get(k, "") for k in ("nome", "instagram", "whatsapp", "texto")}, link=s["link"])
+(sis / "criador.json").write_text(json.dumps(c, ensure_ascii=False, indent=1))
 PY
 
 TMP=$(mktemp -d)

@@ -9,7 +9,7 @@
   Para quem edita os vídeos da igreja local.
 </p>
 
-## Downloads · versão 1.1
+## Downloads · versão 1.2
 
 | | |
 |---|---|
@@ -117,6 +117,13 @@ Seus vídeos, transcrições, cortes e configurações continuam como estão.
 Tudo roda no seu computador. Os vídeos não são enviados para lugar nenhum. Para as análises, só o texto da
 transcrição vai para a IA que você escolher. Suas chaves ficam guardadas só no seu computador. O acesso pelo celular fica desligado até você ligar,
 e é protegido por um código.
+
+## Quer os cortes prontos para postar?
+
+O SermonCut encontra os melhores momentos e entrega o trecho cortado. A **finalização** (legendas
+dinâmicas, música, efeitos e enquadramento vertical no pregador) é feita por quem criou o app:
+dentro do SermonCut, clique em **Quero finalizado** em qualquer corte e o pedido já vai pronto.
+Veja exemplos no Instagram [@ogabrielheid](https://instagram.com/ogabrielheid).
 
 ## Quem criou
 

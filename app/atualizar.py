@@ -14,7 +14,7 @@ import comum
 UV = comum.LOCAL / f"uv{comum.EXE}"
 # o que uma atualização pode trocar (nunca ajustes.json, ia.json, chaves ou pastas de dados)
 EXTENSOES = (".py", ".sh", ".html", ".md", ".txt", ".applescript", ".icns", ".command", ".ps1", ".bat", ".ico", ".json.modelo")
-NOMES = ("VERSAO", "atualizacao.json")
+NOMES = ("VERSAO", "atualizacao.json", "criador.json")
 
 
 def repo():
