@@ -161,6 +161,17 @@ nav .btn { padding: 10px 16px; font-size: 14px; }
 .servico .acoes { justify-content: flex-start; position: relative; z-index: 1; }
 .servico .cta { display: grid; gap: 12px; position: relative; z-index: 1; }
 
+/* exemplos de reels */
+.exemplos { margin-top: 28px; }
+.exemplos h3 { font-size: 19px; margin-bottom: 4px; }
+.exemplos .dica { color: var(--txt3); font-size: 14px; margin-bottom: 16px; }
+.reels { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--borda) transparent; }
+.reel { flex: none; width: 328px; scroll-snap-align: start; border-radius: 14px; overflow: hidden; background: #fff; min-height: 420px; }
+.reel .instagram-media { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; border: 0 !important; border-radius: 14px !important; box-shadow: none !important; }
+.reel blockquote { display: grid; place-items: center; min-height: 420px; padding: 20px; font-weight: 600; }
+.reel blockquote a { color: #ff6a13; }
+@media (max-width: 700px) { .reels { margin: 0 -16px; padding: 0 16px 10px; scroll-padding: 16px; } .reel { width: 82vw; max-width: 328px; } }
+
 /* criador */
 .criador { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; max-width: 820px; margin: 0 auto; }
 .avatar { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 34px; color: #fff;
@@ -448,6 +459,17 @@ footer a:hover { color: var(--txt); }
         <p style="color:var(--txt3);font-size:13.5px;text-align:center">Dentro do app, cada corte tem o botão <b style="color:var(--txt2)">Quero finalizado</b>.</p>
       </div>
     </div>
+    <div class="exemplos">
+      <h3>Exemplos do meu estilo de finalização</h3>
+      <p class="dica">Cortes de pregação finalizados por mim. Arraste para o lado para ver todos.</p>
+      <div class="reels">
+        <div class="reel"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DfCfa6LAEyM/" data-instgrm-version="14"><a href="https://www.instagram.com/reel/DfCfa6LAEyM/" target="_blank" rel="noopener">Ver o corte 1 no Instagram</a></blockquote></div>
+        <div class="reel"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/Dew4LNlt3Hc/" data-instgrm-version="14"><a href="https://www.instagram.com/reel/Dew4LNlt3Hc/" target="_blank" rel="noopener">Ver o corte 2 no Instagram</a></blockquote></div>
+        <div class="reel"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/Dd5ERLsBcMI/" data-instgrm-version="14"><a href="https://www.instagram.com/reel/Dd5ERLsBcMI/" target="_blank" rel="noopener">Ver o corte 3 no Instagram</a></blockquote></div>
+        <div class="reel"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/Dc0jTYYRAom/" data-instgrm-version="14"><a href="https://www.instagram.com/reel/Dc0jTYYRAom/" target="_blank" rel="noopener">Ver o corte 4 no Instagram</a></blockquote></div>
+        <div class="reel"><blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DdGyziHBHWq/" data-instgrm-version="14"><a href="https://www.instagram.com/reel/DdGyziHBHWq/" target="_blank" rel="noopener">Ver o corte 5 no Instagram</a></blockquote></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -529,6 +551,12 @@ let passouHero = false, naBaixar = false;
 const atualizar = () => fixa.classList.toggle("on", passouHero && !naBaixar);
 new IntersectionObserver(([e]) => { passouHero = !e.isIntersecting && e.boundingClientRect.top < 0; atualizar(); }).observe(hero);
 new IntersectionObserver(([e]) => { naBaixar = e.isIntersecting; atualizar(); }, { threshold: 0.15 }).observe(baixar);
+
+// exemplos do Instagram: só carrega quando a pessoa chega na seção
+new IntersectionObserver(([e], o) => {
+  if (!e.isIntersecting) return; o.disconnect();
+  const sc = document.createElement("script"); sc.async = true; sc.src = "https://www.instagram.com/embed.js"; document.body.appendChild(sc);
+}, { rootMargin: "600px" }).observe(document.querySelector(".exemplos"));
 </script>
 </body>
 </html>
