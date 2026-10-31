@@ -59,6 +59,8 @@ rm -rf "$REPO_DIR"
 mkdir -p "$REPO_DIR/app" "$REPO_DIR/docs"
 cp "${ARQS[@]}" VERSAO arquivos.txt instalador.command instalar.ps1 instalar.bat gerar_pacote.sh publicar.sh README_github.md "$REPO_DIR/app/"
 [ -d "$SIS/docs" ] && cp "$SIS/docs/"* "$REPO_DIR/docs/"
+# página de divulgação (GitHub Pages, pasta docs/): ogabrielheid.github.io/sermoncut
+[ -d "$SIS/site" ] && cp -R "$SIS/site/"* "$REPO_DIR/docs/" && touch "$REPO_DIR/docs/.nojekyll"
 sed -e "s#{{REPO}}#$REPO#g" -e "s#{{VERSAO}}#$NOVA#g" "$SIS/README_github.md" > "$REPO_DIR/README.md"
 cd "$REPO_DIR"
 git config user.name "$("$GH" api user -q '.name // .login')"

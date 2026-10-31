@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SermonCut · cortes de pregação em minutos</title>
+<meta name="description" content="Solte o vídeo do culto e o SermonCut encontra os melhores cortes da pregação com o minuto exato, monta o estudo, lista as passagens bíblicas e mostra o que pode viralizar. Grátis para Mac e Windows.">
+<meta name="theme-color" content="#111115">
+<meta property="og:title" content="SermonCut · cortes de pregação em minutos">
+<meta property="og:description" content="Os melhores momentos da pregação, com o minuto exato. Grátis para quem edita os vídeos da igreja local.">
+<meta property="og:image" content="https://ogabrielheid.github.io/sermoncut/img/cortes.jpg">
+<meta property="og:url" content="https://ogabrielheid.github.io/sermoncut/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="img/icone.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111115; --painel: #1a1a20; --painel2: #212129; --borda: #2c2c36;
+  --txt: #f2f2f5; --txt2: #a3a3b0; --txt3: #73737f;
+  --acento: #ff6a13; --acento2: #ff9440; --verde: #3ccf7a;
+  --raio: 16px; --max: 1120px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--txt); font: 16px/1.6 "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; height: auto; }
+svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+section { padding: 72px 0; }
+h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; }
+h2 { font-size: clamp(28px, 4.2vw, 42px); font-weight: 800; }
+.sub { color: var(--txt2); font-size: 17px; max-width: 620px; }
+.centro { text-align: center; }
+.centro .sub { margin: 12px auto 0; }
+.kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--acento2); font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 14px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font: inherit; font-weight: 700; font-size: 16px;
+  padding: 15px 24px; border-radius: 12px; border: 1px solid var(--borda); background: var(--painel2); color: var(--txt); cursor: pointer;
+  transition: transform .15s, background .15s, border-color .15s; white-space: nowrap; }
+.btn:hover { transform: translateY(-1px); border-color: #3d3d4a; }
+.btn.principal { background: linear-gradient(135deg, var(--acento), var(--acento2)); border-color: transparent; color: #fff; box-shadow: 0 10px 30px -10px rgba(255,106,19,.7); }
+.btn.principal:hover { filter: brightness(1.06); }
+.btn svg.i { width: 20px; height: 20px; }
+
+/* topo */
+nav { position: sticky; top: 0; z-index: 10; background: rgba(17,17,21,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(44,44,54,.6); }
+nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.marca { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+.marca img { width: 34px; height: 34px; border-radius: 9px; }
+nav .links { display: flex; align-items: center; gap: 26px; color: var(--txt2); font-weight: 600; font-size: 15px; }
+nav .links a:hover { color: var(--txt); }
+nav .btn { padding: 10px 16px; font-size: 14px; }
+
+/* abertura */
+.hero { padding: 64px 0 40px; position: relative; }
+.hero::before { content: ""; position: absolute; inset: -120px 0 auto; height: 620px; pointer-events: none;
+  background: radial-gradient(600px 320px at 50% 0%, rgba(255,106,19,.22), transparent 70%); }
+.hero .wrap { position: relative; text-align: center; }
+.hero h1 { font-size: clamp(36px, 6.4vw, 66px); font-weight: 800; max-width: 900px; margin: 0 auto; }
+.hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--acento), var(--acento2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .sub { margin: 20px auto 0; font-size: 18px; }
+.acoes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+.selos { display: flex; gap: 8px 18px; justify-content: center; flex-wrap: wrap; margin-top: 22px; color: var(--txt2); font-size: 14px; font-weight: 500; }
+.selos span { display: inline-flex; align-items: center; gap: 6px; }
+.selos svg.i { width: 17px; height: 17px; color: var(--verde); }
+.tela { margin: 48px auto 0; max-width: 1040px; border-radius: 14px; overflow: hidden; border: 1px solid var(--borda);
+  box-shadow: 0 40px 100px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.03); background: var(--painel); }
+.tela .barra { display: flex; gap: 7px; padding: 11px 14px; background: var(--painel2); border-bottom: 1px solid var(--borda); }
+.tela .barra i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a46; }
+
+/* exemplo real */
+.real { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 1040px; margin: 18px auto 0; }
+.real div { background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; padding: 14px 16px; text-align: left; }
+.real b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.real span { color: var(--txt2); font-size: 13.5px; }
+.fonte { color: var(--txt3); font-size: 13.5px; margin-top: 14px; }
+.fonte b { color: var(--txt2); font-weight: 600; }
+@media (max-width: 700px) { .real { grid-template-columns: repeat(2, 1fr); gap: 8px; } .real b { font-size: 22px; } }
+
+/* passos */
+.passos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; counter-reset: p; }
+.passo { background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); padding: 26px; position: relative; }
+.passo .num { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--acento), var(--acento2)); margin-bottom: 16px; }
+.passo h3 { font-size: 19px; margin-bottom: 6px; }
+.passo p { color: var(--txt2); font-size: 15px; }
+
+/* recursos */
+.grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 44px; }
+.rec { background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); padding: 22px; }
+.rec .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--acento2); background: rgba(255,106,19,.1); margin-bottom: 14px; }
+.rec h3 { font-size: 17px; margin-bottom: 4px; }
+.rec p { color: var(--txt2); font-size: 14.5px; line-height: 1.5; }
+
+/* vitrine */
+.abas { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+.abas button { font: inherit; font-weight: 600; font-size: 14.5px; color: var(--txt2); background: var(--painel); border: 1px solid var(--borda);
+  padding: 9px 16px; border-radius: 99px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.abas button svg.i { width: 17px; height: 17px; }
+.abas button.on { color: #fff; background: var(--acento); border-color: var(--acento); }
+.vitrine .tela { margin-top: 24px; }
+.legenda { text-align: center; color: var(--txt2); margin-top: 16px; font-size: 15px; min-height: 24px; }
+
+/* celular */
+.lado { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.fone { justify-self: center; width: min(300px, 78vw); border-radius: 38px; padding: 10px; background: #000; border: 1px solid #2a2a33;
+  box-shadow: 0 40px 80px -30px rgba(255,106,19,.35); }
+.fone img { border-radius: 29px; }
+.lista { list-style: none; margin-top: 22px; display: grid; gap: 12px; }
+.lista li { display: flex; gap: 12px; color: var(--txt2); }
+.lista li svg.i { color: var(--acento2); margin-top: 2px; }
+.lista b { color: var(--txt); font-weight: 600; }
+
+/* ia */
+.ias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 40px; }
+.ia { background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); padding: 22px; }
+.ia .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 12px; }
+.tag.gratis { background: rgba(60,207,122,.13); color: var(--verde); }
+.tag.pago { background: rgba(255,148,64,.13); color: var(--acento2); }
+.ia h3 { font-size: 17px; margin-bottom: 4px; }
+.ia p { color: var(--txt2); font-size: 14.5px; }
+
+/* baixar */
+.baixar { background: linear-gradient(180deg, transparent, rgba(255,106,19,.06)); }
+.aviso-cel { display: none; max-width: 640px; margin: 32px auto 0; background: var(--painel); border: 1px solid rgba(255,106,19,.45);
+  border-radius: var(--raio); padding: 20px; text-align: left; }
+.e-cel .aviso-cel { display: block; }
+.aviso-cel .topo { display: flex; gap: 12px; align-items: flex-start; }
+.aviso-cel .topo svg.i { color: var(--acento2); margin-top: 3px; }
+.aviso-cel p { color: var(--txt2); font-size: 15px; }
+.aviso-cel p b { color: var(--txt); }
+.aviso-cel .acoes { justify-content: flex-start; margin-top: 16px; }
+.aviso-cel .btn { padding: 12px 18px; font-size: 15px; }
+.sistemas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 820px; margin: 32px auto 0; }
+.sis { background: var(--painel); border: 1px solid var(--borda); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; }
+.sis.seu { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento), 0 20px 50px -25px rgba(255,106,19,.6); }
+.sis .cab { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sis .cab svg { width: 30px; height: 30px; }
+.sis h3 { font-size: 22px; }
+.sis .seu-tag { display: none; margin-left: auto; font-size: 12px; font-weight: 700; color: var(--acento2); background: rgba(255,106,19,.12); padding: 3px 10px; border-radius: 99px; }
+.sis.seu .seu-tag { display: inline-block; }
+.sis .req { color: var(--txt2); font-size: 14.5px; margin-bottom: 16px; }
+.sis ol { color: var(--txt2); font-size: 14.5px; padding-left: 20px; margin-bottom: 22px; display: grid; gap: 5px; flex: 1; }
+.sis ol b { color: var(--txt); font-weight: 600; }
+.sis .btn { width: 100%; }
+.nota { text-align: center; color: var(--txt3); font-size: 14px; margin-top: 22px; }
+.nota a { color: var(--acento2); font-weight: 600; }
+
+/* serviço */
+.servico { background: var(--painel); border: 1px solid var(--borda); border-radius: 24px; padding: 44px; display: grid;
+  grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; position: relative; overflow: hidden; }
+.servico::after { content: ""; position: absolute; right: -120px; top: -120px; width: 380px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,106,19,.25), transparent 70%); pointer-events: none; }
+.servico h2 { font-size: clamp(26px, 3.6vw, 36px); }
+.servico .lista { margin-top: 18px; }
+.servico .acoes { justify-content: flex-start; position: relative; z-index: 1; }
+.servico .cta { display: grid; gap: 12px; position: relative; z-index: 1; }
+
+/* criador */
+.criador { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; max-width: 820px; margin: 0 auto; }
+.avatar { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 34px; color: #fff;
+  background: linear-gradient(135deg, var(--acento), var(--acento2)); }
+.criador h3 { font-size: 22px; }
+.criador .ig { color: var(--acento2); font-weight: 600; font-size: 15px; }
+.criador p { color: var(--txt2); margin-top: 10px; font-size: 15.5px; }
+
+/* perguntas */
+.perguntas { max-width: 760px; margin: 36px auto 0; display: grid; gap: 10px; }
+details { background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; padding: 0 20px; }
+summary { list-style: none; cursor: pointer; padding: 18px 0; font-weight: 600; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--acento2); font-size: 22px; line-height: 1; transition: transform .2s; }
+details[open] summary::after { transform: rotate(45deg); }
+details p { color: var(--txt2); padding-bottom: 18px; font-size: 15px; }
+
+footer { border-top: 1px solid var(--borda); padding: 32px 0 calc(32px + env(safe-area-inset-bottom)); color: var(--txt3); font-size: 14px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer a { color: var(--txt2); }
+footer a:hover { color: var(--txt); }
+
+/* barra fixa no celular */
+.fixa { display: none; }
+
+.toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px); opacity: 0; background: #fff; color: #111;
+  font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 10px; transition: .25s; pointer-events: none; z-index: 30; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+
+@media (max-width: 900px) {
+  .grade { grid-template-columns: repeat(2, 1fr); }
+  .ias { grid-template-columns: 1fr; }
+  .lado { grid-template-columns: 1fr; gap: 36px; }
+  .lado .fone { order: 2; }
+  .servico { grid-template-columns: 1fr; padding: 32px 24px; gap: 24px; }
+}
+@media (max-width: 700px) {
+  section { padding: 56px 0; }
+  .wrap { padding: 0 16px; }
+  nav .links a:not(.btn) { display: none; }
+  .hero { padding: 40px 0 24px; }
+  .hero .sub { font-size: 16.5px; }
+  .acoes .btn { width: 100%; }
+  .passos { grid-template-columns: 1fr; gap: 12px; margin-top: 32px; }
+  .passo { padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 0 16px; }
+  .passo .num { grid-row: span 2; margin: 0; }
+  .grade { gap: 10px; margin-top: 32px; }
+  .rec { padding: 16px; }
+  .rec .ic { width: 38px; height: 38px; margin-bottom: 10px; }
+  .rec .ic svg.i { width: 19px; height: 19px; }
+  .rec h3 { font-size: 15.5px; }
+  .rec p { font-size: 13.5px; }
+  .abas { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; margin: 28px -16px 0; padding: 0 16px 4px; scrollbar-width: none; }
+  .abas::-webkit-scrollbar { display: none; }
+  .abas button { flex: none; }
+  .tela { border-radius: 10px; margin-top: 32px; }
+  .tela .barra { padding: 8px 10px; gap: 5px; }
+  .tela .barra i { width: 8px; height: 8px; }
+  .sistemas { grid-template-columns: 1fr; }
+  .sis { padding: 22px; }
+  .criador { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 16px; }
+  footer .wrap { flex-direction: column; text-align: center; align-items: center; }
+  .fixa { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; gap: 10px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(17,17,21,.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--borda);
+    transform: translateY(110%); transition: transform .25s; }
+  .fixa.on { transform: none; }
+  .fixa .btn { flex: 1; padding: 13px 14px; font-size: 15px; }
+  .fixa .btn:last-child { flex: none; width: 52px; padding: 13px 0; }
+  body { padding-bottom: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tesoura" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></symbol>
+  <symbol id="texto" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></symbol>
+  <symbol id="biblia" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/><path d="M12 6v8M9 9h6"/></symbol>
+  <symbol id="estudo" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="aspas" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5H3v8h4c0 3-1 4-4 4zM14 21c3 0 7-1 7-8V5h-7v8h4c0 3-1 4-4 4z"/></symbol>
+  <symbol id="grafico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/><path d="M15 8h5v5"/></symbol>
+  <symbol id="filme" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5"/></symbol>
+  <symbol id="canal" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17V5"/></symbol>
+  <symbol id="baixar" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  <symbol id="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="celular" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
+  <symbol id="computador" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="ia" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="cadeado" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="compartilhar" viewBox="0 0 24 24"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+  <symbol id="copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="instagram" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></symbol>
+  <symbol id="nuvem" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.5 12 3.5 3.5 0 0 0 6 19z"/></symbol>
+  <symbol id="atualizar" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="apple" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.2 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></symbol>
+  <symbol id="windows" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M3 5.5 10.4 4.5v7H3zM11.4 4.4 21 3v8.5h-9.6zM3 12.5h7.4v7L3 18.5zM11.4 12.5H21V21l-9.6-1.4z"/></symbol>
+</svg>
+
+<nav>
+  <div class="wrap">
+    <a class="marca" href="#"><img src="img/icone.png" alt="">SermonCut</a>
+    <div class="links">
+      <a href="#como">Como funciona</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#finalizacao">Cortes prontos</a>
+      <a class="btn principal" href="#baixar">Baixar grátis</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker"><svg class="i"><use href="#tesoura"/></svg> Para quem edita os vídeos da igreja</div>
+    <h1>Os melhores cortes da pregação, <em>com o minuto exato.</em></h1>
+    <p class="sub">Solte o vídeo do culto. O SermonCut transcreve a pregação, encontra os momentos que rendem cortes, monta o estudo e mostra quais têm mais chance de viralizar.</p>
+    <div class="acoes">
+      <a class="btn principal" href="#baixar"><svg class="i"><use href="#baixar"/></svg> Baixar grátis</a>
+      <a class="btn" href="#ver"><svg class="i"><use href="#filme"/></svg> Ver por dentro</a>
+    </div>
+    <div class="selos">
+      <span><svg class="i"><use href="#ok"/></svg> Grátis</span>
+      <span><svg class="i"><use href="#ok"/></svg> Mac e Windows</span>
+      <span><svg class="i"><use href="#ok"/></svg> Funciona com IA grátis</span>
+    </div>
+    <div class="tela"><div class="barra"><i></i><i></i><i></i></div><img src="img/cortes.jpg" width="1440" height="900" alt="Tela do SermonCut com o vídeo do culto, a linha do tempo e os cortes sugeridos"></div>
+    <p class="fonte">Exemplo real: pregação <b>“Enquanto houver vasilhas, haverá multiplicação”</b>, Igreja Família Morumbi (Piracicaba)</p>
+    <div class="real">
+      <div><b>38 min</b><span>de pregação</span></div>
+      <div><b>11</b><span>cortes encontrados</span></div>
+      <div><b>10</b><span>temas separados</span></div>
+      <div><b>81</b><span>maior nota viral</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="como">
+  <div class="wrap">
+    <div class="centro">
+      <div class="kicker">Como funciona</div>
+      <h2>Do culto ao corte em 3 passos</h2>
+      <p class="sub">Você não precisa assistir a pregação inteira de novo para achar os momentos fortes.</p>
+    </div>
+    <div class="passos">
+      <div class="passo"><div class="num">1</div><h3>Traga o vídeo</h3><p>Arraste o arquivo do culto, cole um link do Google Drive ou do YouTube.</p></div>
+      <div class="passo"><div class="num">2</div><h3>A IA analisa</h3><p>A pregação é transcrita no seu computador e a IA separa de 8 a 12 cortes, cada um com gancho e tema.</p></div>
+      <div class="passo"><div class="num">3</div><h3>Exporte o trecho</h3><p>Assista, ajuste e baixe o corte já recortado, em até 4K, pronto para editar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="recursos" style="padding-top:24px">
+  <div class="wrap">
+    <div class="centro">
+      <div class="kicker">Recursos</div>
+      <h2>Tudo o que sai de uma pregação</h2>
+      <p class="sub">Uma tela de edição com o vídeo, a transcrição clicável e a linha do tempo. E muito conteúdo pronto para usar.</p>
+    </div>
+    <div class="grade">
+      <div class="rec"><div class="ic"><svg class="i"><use href="#tesoura"/></svg></div><h3>Cortes</h3><p>Momentos de até 2:59 com gancho, tema e o porquê de cada um.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#texto"/></svg></div><h3>Transcrição</h3><p>A pregação inteira. Clique numa frase e o vídeo vai para ela.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#biblia"/></svg></div><h3>Bíblia</h3><p>Todas as passagens citadas, com o minuto em que aparecem.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#estudo"/></svg></div><h3>Estudo</h3><p>Resumo, lições, perguntas para célula e devocional de 5 dias.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#aspas"/></svg></div><h3>Frases</h3><p>Frases de efeito para legendas, thumbnails e carrosséis.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#grafico"/></svg></div><h3>Viral</h3><p>Uma nota para cada corte pelo que Reels, TikTok e Shorts priorizam.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#filme"/></svg></div><h3>Exportar</h3><p>O trecho recortado em 720p, 1080p ou 4K, de 24 a 60 fps.</p></div>
+      <div class="rec"><div class="ic"><svg class="i"><use href="#canal"/></svg></div><h3>Canal da igreja</h3><p>O que mais performou no YouTube da igreja e ideias para cada rede.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="ver" class="vitrine" style="padding-top:24px">
+  <div class="wrap">
+    <div class="centro">
+      <div class="kicker">Por dentro</div>
+      <h2>Veja como fica</h2>
+      <p class="sub">Telas reais, com cultos e o canal da Igreja Família Morumbi.</p>
+    </div>
+    <div class="abas" role="tablist">
+      <button class="on" data-img="cortes" data-txt="Os 11 cortes da pregação na linha do tempo, separados por tema. Clique em um e assista."><svg class="i"><use href="#tesoura"/></svg>Cortes</button>
+      <button data-img="biblia" data-txt="As passagens que o pregador leu ou citou, com o minuto exato."><svg class="i"><use href="#biblia"/></svg>Bíblia</button>
+      <button data-img="estudo" data-txt="Estudo e devocional para a célula, gerados da própria pregação."><svg class="i"><use href="#estudo"/></svg>Estudo</button>
+      <button data-img="viral" data-txt="Quais cortes têm mais chance de viralizar, e por quê."><svg class="i"><use href="#grafico"/></svg>Viral</button>
+      <button data-img="canal" data-txt="O canal da Igreja Família Morumbi: 16,8 mil inscritos, 75 vídeos analisados e o que mais performou."><svg class="i"><use href="#canal"/></svg>Canal</button>
+    </div>
+    <div class="tela"><div class="barra"><i></i><i></i><i></i></div><img id="vitrineImg" src="img/cortes.jpg" width="1440" height="900" alt="Tela do SermonCut" loading="lazy"></div>
+    <p class="legenda" id="vitrineTxt">Os 11 cortes da pregação na linha do tempo, separados por tema. Clique em um e assista.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap lado">
+    <div>
+      <div class="kicker"><svg class="i"><use href="#celular"/></svg> No celular</div>
+      <h2>Veja os cortes de onde estiver</h2>
+      <p class="sub" style="margin-top:14px">Com o SermonCut aberto no computador, o celular entra pelo Wi‑Fi e vira um app na tela de início.</p>
+      <ul class="lista">
+        <li><svg class="i"><use href="#ok"/></svg><span><b>Assista aos cortes</b> e leia a transcrição, o estudo e a Bíblia.</span></li>
+        <li><svg class="i"><use href="#ok"/></svg><span><b>Copie as frases</b> direto para as legendas.</span></li>
+        <li><svg class="i"><use href="#ok"/></svg><span><b>Exporte um corte</b> e ele baixa no celular.</span></li>
+        <li><svg class="i"><use href="#cadeado"/></svg><span><b>Protegido por código.</b> Fica desligado até você ligar.</span></li>
+      </ul>
+    </div>
+    <div class="fone"><img src="img/celular.jpg" width="600" height="1299" alt="SermonCut aberto no celular" loading="lazy"></div>
+  </div>
+</section>
+
+<section style="padding-top:24px">
+  <div class="wrap">
+    <div class="centro">
+      <div class="kicker"><svg class="i"><use href="#ia"/></svg> Inteligência artificial</div>
+      <h2>Use a IA que você já tem</h2>
+      <p class="sub">A transcrição, o player e a exportação são grátis e rodam no seu computador. Para as análises, você escolhe:</p>
+    </div>
+    <div class="ias">
+      <div class="ia"><span class="tag gratis">Grátis</span><h3>Gemini (Google AI Studio)</h3><p>Totalmente automático, com limite diário. Só criar uma chave grátis.</p></div>
+      <div class="ia"><span class="tag gratis">Grátis</span><h3>Sua conta do ChatGPT, Claude, Gemini ou DeepSeek</h3><p>O app copia o pedido, você cola no chat e traz a resposta de volta.</p></div>
+      <div class="ia"><span class="tag pago">Assinatura ou chave</span><h3>Claude Pro, OpenAI, Anthropic ou DeepSeek</h3><p>Automático, usando a sua assinatura ou chave de API.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="baixar" class="baixar">
+  <div class="wrap">
+    <div class="centro">
+      <div class="kicker"><svg class="i"><use href="#baixar"/></svg> Download</div>
+      <h2>Baixe grátis</h2>
+      <p class="sub">Instala sozinho em uns 5 minutos e se atualiza com um clique quando sai versão nova.</p>
+    </div>
+
+    <div class="aviso-cel">
+      <div class="topo">
+        <svg class="i"><use href="#computador"/></svg>
+        <p><b>Você está no celular.</b> O SermonCut é instalado no computador, que faz o trabalho pesado. Mande o link para você e abra no Mac ou PC.</p>
+      </div>
+      <div class="acoes">
+        <button class="btn principal" data-compartilhar><svg class="i"><use href="#compartilhar"/></svg> Enviar o link para mim</button>
+        <button class="btn" data-copiar><svg class="i"><use href="#copiar"/></svg> Copiar link</button>
+      </div>
+    </div>
+
+    <div class="sistemas">
+      <div class="sis" id="sisMac">
+        <div class="cab"><svg class="i"><use href="#apple"/></svg><h3>Mac</h3><span class="seu-tag">Seu computador</span></div>
+        <p class="req">Chip Apple (M1 ou mais novo), Google Chrome e 3 GB livres.</p>
+        <ol>
+          <li>Abra o <b>SermonCut.zip</b>.</li>
+          <li>Botão direito em <b>Instalar SermonCut.command</b> › <b>Abrir</b>.</li>
+          <li>Siga a janela. O ícone aparece na Mesa.</li>
+        </ol>
+        <a class="btn principal" href="https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut.zip"><svg class="i"><use href="#baixar"/></svg> Baixar para Mac</a>
+      </div>
+      <div class="sis" id="sisWin">
+        <div class="cab"><svg class="i"><use href="#windows"/></svg><h3>Windows</h3><span class="seu-tag">Seu computador</span></div>
+        <p class="req">Windows 10 ou 11 (64 bits) e 3 GB livres.</p>
+        <ol>
+          <li>Botão direito no zip › <b>Extrair tudo</b>.</li>
+          <li>Dois cliques em <b>Instalar SermonCut.bat</b>.</li>
+          <li>Se o Windows avisar: <b>Mais informações › Executar assim mesmo</b>.</li>
+        </ol>
+        <a class="btn principal" href="https://github.com/ogabrielheid/sermoncut/releases/latest/download/SermonCut-Windows.zip"><svg class="i"><use href="#baixar"/></svg> Baixar para Windows</a>
+      </div>
+    </div>
+    <p class="nota">Código aberto e todas as versões no <a href="https://github.com/ogabrielheid/sermoncut">GitHub</a>.</p>
+  </div>
+</section>
+
+<section id="finalizacao">
+  <div class="wrap">
+    <div class="servico">
+      <div>
+        <div class="kicker"><svg class="i"><use href="#ia"/></svg> Serviço de finalização</div>
+        <h2>Quer os cortes prontos para postar?</h2>
+        <p class="sub" style="margin-top:12px">O SermonCut acha os melhores momentos. A finalização eu faço para você:</p>
+        <ul class="lista">
+          <li><svg class="i"><use href="#ok"/></svg><span><b>Legendas dinâmicas</b> no estilo dos vídeos que viralizam</span></li>
+          <li><svg class="i"><use href="#ok"/></svg><span><b>Música e efeitos</b> que seguram a atenção</span></li>
+          <li><svg class="i"><use href="#ok"/></svg><span><b>Enquadramento vertical</b> no pregador e gancho forte</span></li>
+        </ul>
+      </div>
+      <div class="cta">
+        <a class="btn principal" href="https://ig.me/m/ogabrielheid" target="_blank" rel="noopener"><svg class="i"><use href="#instagram"/></svg> Pedir orçamento</a>
+        <a class="btn" href="https://instagram.com/ogabrielheid" target="_blank" rel="noopener"><svg class="i"><use href="#filme"/></svg> Ver exemplos no Instagram</a>
+        <p style="color:var(--txt3);font-size:13.5px;text-align:center">Dentro do app, cada corte tem o botão <b style="color:var(--txt2)">Quero finalizado</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:24px">
+  <div class="wrap">
+    <div class="criador">
+      <div class="avatar">G</div>
+      <div>
+        <h3>Gabriel Krause Heidemann</h3>
+        <a class="ig" href="https://instagram.com/ogabrielheid" target="_blank" rel="noopener">@ogabrielheid</a>
+        <p>Como editor, percebi que não existia nada feito especificamente para quem faz cortes de pregação da sua igreja local. O SermonCut nasceu para ajudar quem trabalha com isso, ou quem quer servir a própria igreja criando conteúdo. Hoje faço parte da Igreja Família Morumbi, liderada pelos apóstolos Cesar e Carla Graciane.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:24px">
+  <div class="wrap">
+    <div class="centro"><h2>Perguntas</h2></div>
+    <div class="perguntas">
+      <details><summary>É grátis mesmo?</summary><p>Sim. O app é grátis. A transcrição e a exportação rodam no seu computador sem custo, e dá para usar uma IA grátis (Gemini ou a sua conta grátis do ChatGPT, Claude ou DeepSeek) nas análises.</p></details>
+      <details><summary>Preciso saber editar vídeo?</summary><p>Não. Ele encontra os momentos e entrega o trecho recortado. Se quiser o corte com legenda, música e efeitos, dá para pedir a finalização pelo botão Quero finalizado.</p></details>
+      <details><summary>Meus vídeos vão para a internet?</summary><p>Não. Tudo roda no seu computador. Só o texto da transcrição vai para a IA que você escolher, e as suas chaves ficam guardadas só com você.</p></details>
+      <details><summary>Funciona no celular?</summary><p>O app é instalado no Mac ou no Windows. Depois, o celular acessa pelo Wi‑Fi para ver os cortes, ler o estudo, copiar frases e baixar cortes.</p></details>
+      <details><summary>Quanto tempo leva um culto?</summary><p>Depende do computador e do tamanho do vídeo. Num computador comum, uma pregação de 1 hora fica pronta em alguns minutos, sem você precisar acompanhar.</p></details>
+      <details><summary>Como recebo as novidades?</summary><p>O SermonCut avisa quando sai versão nova e atualiza com um clique. Seus vídeos, cortes e configurações continuam como estão.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>SermonCut · feito por <a href="https://instagram.com/ogabrielheid" target="_blank" rel="noopener">@ogabrielheid</a></span>
+    <span><a href="https://github.com/ogabrielheid/sermoncut">GitHub</a> · <a href="https://github.com/ogabrielheid/sermoncut/releases">Versões</a></span>
+  </div>
+</footer>
+
+<div class="fixa" id="fixa">
+  <a class="btn principal" href="#baixar"><svg class="i"><use href="#baixar"/></svg> Baixar grátis</a>
+  <a class="btn" href="https://instagram.com/ogabrielheid" target="_blank" rel="noopener" aria-label="Instagram"><svg class="i"><use href="#instagram"/></svg></a>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ua = navigator.userAgent;
+const celular = /iPhone|iPad|iPod|Android/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (celular) document.body.classList.add("e-cel");
+else if (/Mac/i.test(ua)) document.getElementById("sisMac").classList.add("seu");
+else if (/Windows/i.test(ua)) document.getElementById("sisWin").classList.add("seu");
+
+// vitrine
+const img = document.getElementById("vitrineImg"), txt = document.getElementById("vitrineTxt");
+document.querySelectorAll(".abas button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".abas button").forEach(x => x.classList.toggle("on", x === b));
+  img.src = "img/" + b.dataset.img + ".jpg";
+  txt.textContent = b.dataset.txt;
+}));
+["biblia", "estudo", "viral", "canal"].forEach(n => { const i = new Image(); i.loading = "lazy"; setTimeout(() => i.src = "img/" + n + ".jpg", 2500); });
+
+// link para abrir no computador
+const LINK = "https://ogabrielheid.github.io/sermoncut/";
+const toast = document.getElementById("toast");
+function avisar(t) { toast.textContent = t; toast.classList.add("on"); setTimeout(() => toast.classList.remove("on"), 2200); }
+async function copiar() {
+  try { await navigator.clipboard.writeText(LINK); avisar("Link copiado"); }
+  catch (e) { prompt("Copie o link:", LINK); }
+}
+document.querySelectorAll("[data-copiar]").forEach(b => b.addEventListener("click", copiar));
+document.querySelectorAll("[data-compartilhar]").forEach(b => b.addEventListener("click", async () => {
+  if (navigator.share) {
+    try { await navigator.share({ title: "SermonCut", text: "Baixar o SermonCut no computador:", url: LINK }); } catch (e) {}
+  } else copiar();
+}));
+
+// botão fixo no celular depois da abertura, some na área de download
+const fixa = document.getElementById("fixa");
+const hero = document.querySelector(".hero .acoes"), baixar = document.getElementById("baixar");
+let passouHero = false, naBaixar = false;
+const atualizar = () => fixa.classList.toggle("on", passouHero && !naBaixar);
+new IntersectionObserver(([e]) => { passouHero = !e.isIntersecting && e.boundingClientRect.top < 0; atualizar(); }).observe(hero);
+new IntersectionObserver(([e]) => { naBaixar = e.isIntersecting; atualizar(); }, { threshold: 0.15 }).observe(baixar);
+</script>
+</body>
+</html>
